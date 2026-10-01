@@ -174,6 +174,10 @@ const totalPassos=1+1+totalItens+VIDEO.questoes.length+1;
 function setProgress(step,label){document.getElementById('progbar').style.width=Math.min(100,(step/totalPassos)*100)+'%';document.getElementById('stepnote').textContent=label||'';}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&['q','video'].includes(st.screen)){st.focoPerdido++;toast('Saída de tela detectada e registrada.');}});
 function val(id){return document.getElementById(id).value.trim();}
+function soDigitos(s){return (s||'').replace(/\D/g,'').slice(0,11);}
+function formataFone(s){const d=soDigitos(s);if(d.length<=2)return d?'('+d:'';const corte=d.length>10?7:6;
+ return d.length<=corte?'('+d.slice(0,2)+') '+d.slice(2):'('+d.slice(0,2)+') '+d.slice(2,corte)+'-'+d.slice(corte);}
+function emailValido(s){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);}
 
 /* ===== INTRO ===== */
 function screenIntro(){st.screen='intro';setProgress(0,'');
@@ -196,12 +200,17 @@ function screenIntro(){st.screen='intro';setProgress(0,'');
 function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
  app.innerHTML=`<div class="card"><div class="eyebrow">Antes de começar</div><h2 class="q-title">Seus dados de contato</h2>
   <label class="f">Nome completo</label><input class="f" id="nome" autocomplete="name">
-  <label class="f">WhatsApp (com DDD)</label><input class="f" id="fone" inputmode="tel" placeholder="(11) 90000-0000">
+  <label class="f">WhatsApp (com DDD)</label><input class="f" id="fone" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="(11) 90000-0000">
   <label class="f">E-mail</label><input class="f" id="email" inputmode="email" autocomplete="email">
   <div class="btn-row"><button class="btn btn-primary" id="go">Continuar</button></div></div>`;
+ const fe=document.getElementById('fone');
+ fe.oninput=()=>{fe.value=formataFone(fe.value);};
  document.getElementById('go').onclick=()=>{const nome=val('nome'),fone=val('fone'),email=val('email');
   if(!nome||!fone||!email){toast('Preencha nome, WhatsApp e e-mail.');return;}
-  st.cand={nome,telefone:fone,email};screenTriagem();};}
+  const dig=soDigitos(fone);
+  if(dig.length<10){toast('WhatsApp incompleto — informe DDD e número.');return;}
+  if(!emailValido(email)){toast('E-mail inválido.');return;}
+  st.cand={nome,telefone:formataFone(dig),email};screenTriagem();};}
 
 /* ===== TRIAGEM ===== */
 function screenTriagem(){st.screen='triagem';setProgress(1,'Triagem');
