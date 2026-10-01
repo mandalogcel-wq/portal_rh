@@ -70,6 +70,11 @@ for conta dele (logins/credenciais); o resto execute.
     informar as chaves da Z-API. O gestor já está definido: **Rodrigo Freitas —
     rodrigo.freitas@mandalog.com.br** (const `GESTOR` no `public/index.html`). Gestor
     único, então não há rodízio; o sorteio aleatório que existia foi removido.
+  - **Z-API:** o Marcus optou por reaproveitar a instância **"Supley"**, que está
+    conectada e ociosa. Consequência aceita por ele: as mensagens do RH saem pelo número
+    do Supley, e um eventual bloqueio da Meta por uso de API não oficial atinge os dois
+    negócios. Se um dia for preciso separar, basta criar outra instância com um chip do
+    RH e trocar a credencial no n8n — o workflow não muda.
   - Grade definida pelo Marcus: **10h às 12h e 14h às 16h, de 30 em 30 minutos**
     (10 horários por dia), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
     `public/index.html`: `janelas` aceita quantos períodos quiser; `passo`, `duracao`,
