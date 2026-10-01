@@ -67,8 +67,9 @@ for conta dele (logins/credenciais); o resto execute.
     WhatsApp.
   - Falta (depende do Marcus): conectar a credencial do **Google Calendar** no n8n e
     informar **instance, token e client-token da Z-API** mais o **ID do grupo**; e
-    definir os **gestores reais** (nome + e-mail). O sorteio aleatório do gestor foi
-    removido.
+    informar as chaves da Z-API. O gestor já está definido: **Rodrigo Freitas —
+    rodrigo.freitas@mandalog.com.br** (const `GESTOR` no `public/index.html`). Gestor
+    único, então não há rodízio; o sorteio aleatório que existia foi removido.
   - Grade definida pelo Marcus: **10h às 12h e 14h às 16h, de 30 em 30 minutos**
     (10 horários por dia), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
     `public/index.html`: `janelas` aceita quantos períodos quiser; `passo`, `duracao`,
@@ -90,7 +91,7 @@ for conta dele (logins/credenciais); o resto execute.
 
 ## Decisões a confirmar com o Marcus
 - Projeto Vercel e domínio (ex.: vagas.mandalog.com.br).
-- Corte da nota (hoje 85) e gestores da entrevista.
+- Corte da nota (hoje 85).
 - Se a indisponibilidade aos sábados deve reprovar o candidato (hoje a resposta é só
   registrada na triagem, sem peso na nota).
 - ESL e 1 ano de experiência: obrigatórios ou desejáveis (afeta só a pontuação da triagem).

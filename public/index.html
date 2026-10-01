@@ -423,6 +423,8 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
 
 /* ===== AGENDAMENTO (trava real via n8n + Google Calendar) =====
    Entrevistas das 14h às 16h, de 30 em 30 minutos, em dias úteis. */
+/* Gestor que conduz as entrevistas (convidado do evento no Calendar). */
+const GESTOR={nome:'Rodrigo Freitas',email:'rodrigo.freitas@mandalog.com.br'};
 const AGENDA={janelas:[{nome:'Manhã',inicio:'10:00',fim:'12:00'},
                        {nome:'Tarde',inicio:'14:00',fim:'16:00'}],
               passo:30,duracao:30,dias:5,sabado:false};
