@@ -1,6 +1,8 @@
 # Planilha de candidatos — estrutura
 
-Crie um Google Sheets chamado **"Mandalog — Candidatos RH"** com uma aba **`Candidatos`**.
+A planilha já existe: **"Mandalog — Candidatos RH"**, aba **`Candidatos`**, ID
+`15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA`. O que segue é a estrutura dela
+(e o que recriar, se um dia for preciso).
 Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome de coluna):
 
 | Coluna | Conteúdo |

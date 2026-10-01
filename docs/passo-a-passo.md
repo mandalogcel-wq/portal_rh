@@ -7,20 +7,26 @@ Arquitetura:
               → Webhook n8n (/webhook/rh-candidatura)
               → Google Sheets (linha do candidato)   [+ Drive p/ vídeo, opcional]
 
-## 1. Google Sheets
-- Crie a planilha conforme `docs/planilha-candidatos.md`.
-- Copie o **ID da planilha** (parte da URL entre `/d/` e `/edit`).
+## 1. Google Sheets — já criada
+Planilha **"Mandalog — Candidatos RH"**, aba `Candidatos`, cabeçalho de
+`docs/planilha-candidatos.md`. ID: `15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA`.
+Compartilhada com `automacao.ia@mandalog.com.br` (conta da credencial do n8n).
 
-## 2. n8n
-- Importe `n8n/RH_Captura_Candidatura.json`.
-- **Reconecte a credencial do Google Sheets** no nó "Google Sheets (Append)"
-  (toda importação perde a credencial).
-- Troque `COLE_AQUI_O_ID_DA_PLANILHA` pelo ID real.
-- **Active** o workflow e copie a URL de produção do webhook
-  (formato limpo: `https://SEU-N8N/webhook/rh-candidatura` — não a versão com UUID).
+Para recriar do zero: crie a planilha conforme `docs/planilha-candidatos.md` e copie o
+**ID** (parte da URL entre `/d/` e `/edit`).
+
+## 2. n8n — já publicado
+Workflow **RH - Captura de Candidatura (Portal SAC)**, ativo, com a credencial
+Google Sheets `automacao.ia@mandalog.com.br` ligada. A URL de produção do webhook
+(`https://SEU-N8N/webhook/rh-candidatura`, formato limpo, não a versão com UUID) é o
+valor de `N8N_WEBHOOK_CANDIDATURA` na Vercel.
+
+Para recriar: importe `n8n/RH_Captura_Candidatura.json`, **reconecte a credencial do
+Google Sheets** no nó "Gravar na Planilha de Candidatos" (toda importação perde a
+credencial), confira o ID da planilha e **ative** o workflow.
 
 ## 3. GitHub + Vercel
-- `git init` → commit → cria repo no GitHub → `vercel link`/deploy.
+- Repositório: `mandalogcel-wq/portal_rh`. Depois: `vercel link` / deploy.
 - Na Vercel, defina a variável de ambiente:
   - `N8N_WEBHOOK_CANDIDATURA` = a URL do webhook do passo 2.
 - Deploy de produção. O site serve `public/index.html` e a função `api/candidatura.js`.

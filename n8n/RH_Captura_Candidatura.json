@@ -11,38 +11,81 @@
       "id": "webhook-candidatura",
       "name": "Webhook Candidatura",
       "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
+      "typeVersion": 2.1,
       "position": [240, 300],
       "webhookId": "rh-candidatura"
     },
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// Achata o payload do portal para uma linha de planilha.\nconst b = $json.body || $json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst vids = Array.isArray(b.videos) ? b.videos : [];\n\nreturn { json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_videos: vids.length\n} };"
+        "language": "javaScript",
+        "jsCode": "const b = $json.body || $json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst vids = Array.isArray(b.videos) ? b.videos : [];\n\nreturn { json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_videos: vids.length\n} };"
       },
       "id": "map-fields",
       "name": "Montar Linha",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 300]
+      "position": [520, 300]
     },
     {
       "parameters": {
+        "resource": "sheet",
         "operation": "append",
-        "documentId": { "__rl": true, "value": "COLE_AQUI_O_ID_DA_PLANILHA", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "Candidatos", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA",
+          "cachedResultName": "Mandalog — Candidatos RH"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "861874780",
+          "cachedResultName": "Candidatos"
+        },
         "columns": {
           "mappingMode": "autoMapInputData",
           "value": {},
-          "matchingColumns": []
+          "schema": [
+            { "id": "data", "displayName": "data", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "vaga", "displayName": "vaga", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "nome", "displayName": "nome", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "whatsapp", "displayName": "whatsapp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "experiencia", "displayName": "experiencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "app_rastreamento", "displayName": "app_rastreamento", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "esl", "displayName": "esl", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "regiao", "displayName": "regiao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "horario_pref", "displayName": "horario_pref", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "nota_final", "displayName": "nota_final", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "pct_triagem", "displayName": "pct_triagem", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "pct_tecnico", "displayName": "pct_tecnico", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "comunicacao", "displayName": "comunicacao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "senso_urgencia", "displayName": "senso_urgencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "gestao_conflitos", "displayName": "gestao_conflitos", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "proatividade", "displayName": "proatividade", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "cobranca_influencia", "displayName": "cobranca_influencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "resiliencia", "displayName": "resiliencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "registro", "displayName": "registro", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "pct_perfil", "displayName": "pct_perfil", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "foco_perdido", "displayName": "foco_perdido", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "qtd_videos", "displayName": "qtd_videos", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ]
         },
-        "options": {}
+        "options": { "handlingExtraData": "ignoreIt" }
       },
       "id": "sheets-append",
-      "name": "Google Sheets (Append)",
+      "name": "Gravar na Planilha de Candidatos",
       "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [720, 300]
+      "typeVersion": 4.7,
+      "position": [800, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "U19EKQk0BfI6Usmr",
+          "name": "automacao.ia@mandalog.com.br"
+        }
+      }
     },
     {
       "parameters": {
@@ -51,28 +94,27 @@
         "options": {}
       },
       "id": "responder",
-      "name": "Responder",
+      "name": "Responder ao Portal",
       "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
-      "position": [960, 300]
+      "typeVersion": 1.5,
+      "position": [1080, 300]
     },
     {
       "parameters": {
-        "content": "## Captura de Candidatura — Portal SAC\n\n1. Importe este workflow no n8n.\n2. Reconecte a credencial do **Google Sheets** no nó Append (importar sempre perde a credencial).\n3. Troque `COLE_AQUI_O_ID_DA_PLANILHA` pelo ID da planilha de candidatos.\n4. Publique (Active) e copie a URL do webhook: `/webhook/rh-candidatura`.\n5. Cole essa URL na variável `N8N_WEBHOOK_CANDIDATURA` da Vercel.\n\n**Opcional (vídeo):** adicionar um nó Google Drive para salvar `videos[].dataUrl` (base64) e gravar o link na planilha. Ver docs/passo-a-passo.md.",
-        "height": 300,
-        "width": 420
+        "content": "## Captura de Candidatura — Portal SAC\n\nO portal envia o resultado para `/api/candidatura` (função na Vercel), que repassa para o webhook `POST /webhook/rh-candidatura` deste workflow.\n\n**Montar Linha** achata o payload em uma linha e **Gravar na Planilha** faz o append na aba `Candidatos` da planilha \"Mandalog — Candidatos RH\" (auto-map por nome de coluna).\n\nCorte atual: nota >= 85 chega com `status = AGENDAR_ENTREVISTA`.\n\n**Vídeo (fase 2):** adicionar um nó Google Drive para salvar `videos[].dataUrl` (base64) e gravar o link numa coluna `link_videos`.",
+        "color": 4
       },
       "id": "nota",
       "name": "LEIA-ME",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [240, 480]
+      "position": [100, 300]
     }
   ],
   "connections": {
     "Webhook Candidatura": { "main": [[{ "node": "Montar Linha", "type": "main", "index": 0 }]] },
-    "Montar Linha": { "main": [[{ "node": "Google Sheets (Append)", "type": "main", "index": 0 }]] },
-    "Google Sheets (Append)": { "main": [[{ "node": "Responder", "type": "main", "index": 0 }]] }
+    "Montar Linha": { "main": [[{ "node": "Gravar na Planilha de Candidatos", "type": "main", "index": 0 }]] },
+    "Gravar na Planilha de Candidatos": { "main": [[{ "node": "Responder ao Portal", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" },
   "active": false
