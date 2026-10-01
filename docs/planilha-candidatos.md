@@ -15,7 +15,7 @@ Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome
 | experiencia | Experiência em SAC/last mile (triagem) |
 | app_rastreamento | App de rastreamento usado |
 | esl | Já usou ESL (Sim/Não) |
-| regiao | Região onde mora |
+| regiao | Região escolhida na triagem (pontua proximidade) |
 | horario_pref | Horário preferido |
 | nota_final | Nota final 0–100 |
 | pct_triagem | % da triagem |
@@ -32,6 +32,10 @@ Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome
 | foco_perdido | Nº de saídas de tela durante a prova |
 | qtd_audios | Quantidade de áudios gravados |
 | link_audios | Links dos áudios no Drive (um por linha) |
+| cidade | Cidade onde o candidato mora (cadastro) |
+| bairro | Bairro onde o candidato mora (cadastro) |
+| indicado | Veio pela campanha Indique e Ganhe (Sim/Não) |
+| indicado_por | Nome do colaborador que indicou (vazio se não houve indicação) |
 
 > Corte atual: **nota ≥ 85** marca `status = AGENDAR_ENTREVISTA`.
 > Dica: deixe a coluna `nota_final` com formatação condicional (verde ≥ 85) para bater o olho.

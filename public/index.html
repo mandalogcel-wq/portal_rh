@@ -13,12 +13,13 @@
 body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
 h1,h2,h3{font-family:'Outfit',system-ui,sans-serif;margin:0;line-height:1.15}
 .wrap{max-width:720px;margin:0 auto;padding:20px 18px 64px}
-.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(247,248,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(13,21,38,.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topbar .stepnote{color:#92A3BC}
 .topbar-inner{max-width:720px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:14px}
 .brand{display:flex;align-items:center;gap:9px;font-family:'Outfit';font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.2px}
 .brand .dot{width:11px;height:11px;border-radius:3px;background:var(--orange)}
 .stepnote{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500}
-.progress{height:4px;background:var(--line);border-radius:99px;overflow:hidden;max-width:720px;margin:0 auto}
+.progress{height:4px;background:rgba(255,255,255,.13);border-radius:99px;overflow:hidden;max-width:720px;margin:0 auto}
 .progress>i{display:block;height:100%;width:0;background:var(--orange);transition:width .35s ease}
 .timer{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
 .timer .ring{position:relative;width:48px;height:48px;flex:0 0 auto}.timer .ring svg{transform:rotate(-90deg)}
@@ -46,6 +47,24 @@ h1,h2,h3{font-family:'Outfit',system-ui,sans-serif;margin:0;line-height:1.15}
 label.f{display:block;font-size:13px;color:var(--muted);font-weight:500;margin:14px 0 6px}
 input.f,select.f{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-family:'Inter';color:var(--ink);background:#fff}
 input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
+.brandlogo{display:block;height:36px;width:auto}
+@media(max-width:420px){.brandlogo{height:30px}}
+
+/* Capa com a foto do armazem — mesma linguagem do mandalog.com.br */
+.capa{position:relative;border-radius:16px;overflow:hidden;margin-bottom:18px;background:#0D1526;
+ background-image:linear-gradient(105deg,rgba(13,21,38,.90) 0%,rgba(13,21,38,.72) 48%,rgba(13,21,38,.45) 100%),url('/armazem-sm.jpg');
+ background-size:cover;background-position:center;box-shadow:var(--shadow)}
+@media(min-width:561px){.capa{background-image:linear-gradient(105deg,rgba(13,21,38,.92) 0%,rgba(13,21,38,.70) 48%,rgba(13,21,38,.38) 100%),url('/armazem.jpg')}}
+.capa-in{position:relative;padding:40px 26px 34px;min-height:260px;display:flex;flex-direction:column;justify-content:flex-end}
+.capa .eyebrow-vaga{display:inline-block;border-left:3px solid var(--orange);background:rgba(13,21,38,.55);
+ color:#DCE5F2;font-family:'Outfit';font-weight:600;font-size:11.5px;letter-spacing:1.6px;text-transform:uppercase;
+ padding:7px 12px;margin-bottom:16px;line-height:1.5}
+.capa h1{font-family:'Outfit';font-weight:800;text-transform:uppercase;font-size:38px;line-height:.98;
+ letter-spacing:-.8px;color:#fff;margin-bottom:14px}
+.capa h1 em{font-style:normal;color:var(--orange)}
+.capa .lead{color:#C8D5E8;font-size:15.5px;margin:0;max-width:30em;text-shadow:0 1px 10px rgba(13,21,38,.6)}
+@media(max-width:420px){.capa-in{padding:28px 18px 24px;min-height:230px}.capa h1{font-size:30px}.capa .eyebrow-vaga{font-size:10.5px;letter-spacing:1.2px}}
+
 .hero h1{font-size:28px;color:var(--navy);margin-bottom:8px;letter-spacing:-.3px}
 .hero .role{display:inline-block;background:var(--navy);color:#fff;font-family:'Outfit';font-weight:600;font-size:13px;padding:6px 12px;border-radius:8px;margin-bottom:18px}
 .lead{color:var(--muted);font-size:15.5px;margin-bottom:22px}
@@ -93,7 +112,7 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 </style>
 </head>
 <body>
-<div class="topbar"><div class="topbar-inner"><div class="brand"><span class="dot"></span> MANDALOG</div><div class="stepnote" id="stepnote"></div></div><div class="progress"><i id="progbar"></i></div></div>
+<div class="topbar"><div class="topbar-inner"><img class="brandlogo" src="/logo-topo.png" alt="Mandalog Operações Logísticas" width="113" height="36"><div class="stepnote" id="stepnote"></div></div><div class="progress"><i id="progbar"></i></div></div>
 <div class="wrap" id="app"></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -205,9 +224,14 @@ function blocoAjuda(){return `<div class="ajuda">
 
 /* ===== INTRO ===== */
 function screenIntro(){st.screen='intro';setProgress(0,'');
- app.innerHTML=`<div class="card hero"><span class="role">${VAGA.titulo} · ${VAGA.local} · ${VAGA.jornada}</span>
-  <h1>Processo seletivo Mandalog</h1>
-  <p class="lead">Você vai acompanhar entregas em rota, tratar ocorrências e manter cliente e motoristas informados. Esta avaliação é rápida e cronometrada. Só a parte técnica tem resposta certa — o resto mostra o seu jeito de trabalhar.</p>
+ app.innerHTML=`<div class="capa"><div class="capa-in">
+   <span class="eyebrow-vaga">${VAGA.titulo} · ${VAGA.local} · ${VAGA.jornada}</span>
+   <h1>Trabalhe na <em>Mandalog</em></h1>
+   <p class="lead">Você vai acompanhar entregas em rota, tratar ocorrências e manter cliente e motoristas informados — do armazém de Bonsucesso à porta do cliente.</p>
+  </div></div>
+  <div class="card">
+  <h2 class="q-title" style="margin-bottom:8px">Como é o processo</h2>
+  <p class="lead" style="margin-bottom:18px">Esta avaliação é rápida e cronometrada. Só a parte técnica tem resposta certa — o resto mostra o seu jeito de trabalhar.</p>
   <div class="steps">
    <div class="stepitem"><div class="n">1</div><div class="d"><b>Triagem</b>Experiência e perfil para a vaga</div></div>
    <div class="stepitem"><div class="n">2</div><div class="d"><b>Teste técnico e prático</b>Situações reais do SAC</div></div>
@@ -226,15 +250,28 @@ function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
   <label class="f">Nome completo</label><input class="f" id="nome" autocomplete="name">
   <label class="f">WhatsApp (com DDD)</label><input class="f" id="fone" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="(11) 90000-0000">
   <label class="f">E-mail</label><input class="f" id="email" inputmode="email" autocomplete="email">
+  <label class="f">Cidade onde mora</label><input class="f" id="cidade" autocomplete="address-level2" placeholder="Guarulhos">
+  <label class="f">Bairro</label><input class="f" id="bairro" autocomplete="address-level3" placeholder="Bonsucesso">
+  <label class="f">Alguém da Mandalog indicou você? (campanha Indique e Ganhe)</label>
+  <select class="f" id="indicou"><option value="">Selecione...</option><option value="sim">Sim, fui indicado(a)</option><option value="nao">Não, vim por conta própria</option></select>
+  <div id="boxind" class="hide"><label class="f">Nome de quem indicou</label><input class="f" id="indnome" placeholder="Nome completo do colaborador"></div>
   <div class="btn-row"><button class="btn btn-primary" id="go">Continuar</button></div>${blocoAjuda()}</div>`;
  const fe=document.getElementById('fone');
  fe.oninput=()=>{fe.value=formataFone(fe.value);};
+ const sel=document.getElementById('indicou'),box=document.getElementById('boxind');
+ sel.onchange=()=>{box.classList.toggle('hide',sel.value!=='sim');};
  document.getElementById('go').onclick=()=>{const nome=val('nome'),fone=val('fone'),email=val('email');
+  const cidade=val('cidade'),bairro=val('bairro'),ind=sel.value,indnome=val('indnome');
   if(!nome||!fone||!email){toast('Preencha nome, WhatsApp e e-mail.');return;}
   const dig=soDigitos(fone);
   if(dig.length<10){toast('WhatsApp incompleto — informe DDD e número.');return;}
   if(!emailValido(email)){toast('E-mail inválido.');return;}
-  st.cand={nome,telefone:formataFone(dig),email};screenTriagem();};}
+  if(!cidade||!bairro){toast('Informe a cidade e o bairro onde você mora.');return;}
+  if(!ind){toast('Diga se você foi indicado por alguém da Mandalog.');return;}
+  if(ind==='sim'&&!indnome){toast('Informe o nome de quem indicou você.');return;}
+  st.cand={nome,telefone:formataFone(dig),email,cidade,bairro,
+   indicado:ind==='sim'?'Sim':'Não',indicado_por:ind==='sim'?indnome:''};
+  screenTriagem();};}
 
 /* ===== TRIAGEM ===== */
 function screenTriagem(){st.screen='triagem';setProgress(1,'Triagem');

@@ -12,17 +12,28 @@
       "name": "Webhook Candidatura",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "webhookId": "rh-candidatura"
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
           "conditions": [
             {
               "leftValue": "={{ (($json.body || $json).audios || []).filter(a => a && a.dataUrl).length > 0 }}",
-              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
             }
           ],
           "combinator": "and"
@@ -32,7 +43,10 @@
       "name": "Gravou Audio?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -44,7 +58,10 @@
       "name": "Separar Audios",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [480, 180]
+      "position": [
+        480,
+        180
+      ]
     },
     {
       "parameters": {
@@ -60,7 +77,10 @@
       "name": "Gerar Arquivo de Audio",
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
-      "position": [720, 180]
+      "position": [
+        720,
+        180
+      ]
     },
     {
       "parameters": {
@@ -68,22 +88,35 @@
         "operation": "upload",
         "inputDataFieldName": "data",
         "name": "={{ $('Separar Audios').item.json.filename }}",
-        "driveId": { "__rl": true, "mode": "list", "value": "My Drive", "cachedResultName": "My Drive" },
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive",
+          "cachedResultName": "My Drive"
+        },
         "folderId": {
           "__rl": true,
           "mode": "id",
           "value": "18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc",
           "cachedResultName": "Mandalog — Áudios Candidatos RH"
         },
-        "options": { "simplifyOutput": true }
+        "options": {
+          "simplifyOutput": true
+        }
       },
       "id": "subir-drive",
       "name": "Subir Audio no Drive",
       "type": "n8n-nodes-base.googleDrive",
       "typeVersion": 3,
-      "position": [960, 180],
+      "position": [
+        960,
+        180
+      ],
       "credentials": {
-        "googleDriveOAuth2Api": { "id": "0Gj09haV4VN6YkiR", "name": "Google Drive account" }
+        "googleDriveOAuth2Api": {
+          "id": "0Gj09haV4VN6YkiR",
+          "name": "Google Drive account"
+        }
       }
     },
     {
@@ -91,7 +124,11 @@
         "aggregate": "aggregateIndividualFields",
         "fieldsToAggregate": {
           "fieldToAggregate": [
-            { "fieldToAggregate": "id", "renameField": true, "outputFieldName": "ids" }
+            {
+              "fieldToAggregate": "id",
+              "renameField": true,
+              "outputFieldName": "ids"
+            }
           ]
         },
         "options": {}
@@ -100,19 +137,25 @@
       "name": "Agregar Links",
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
-      "position": [1200, 180]
+      "position": [
+        1200,
+        180
+      ]
     },
     {
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const b = $('Webhook Candidatura').first().json.body || $('Webhook Candidatura').first().json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst auds = Array.isArray(b.audios) ? b.audios : [];\n\nlet ids = [];\ntry { ids = $('Agregar Links').first().json.ids || []; } catch (e) { ids = []; }\nconst links = ids.filter(Boolean).map(id => 'https://drive.google.com/file/d/' + id + '/view');\n\nreturn [{ json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_audios: auds.length,\n  link_audios: links.join('\\n')\n} }];"
+        "jsCode": "const b = $('Webhook Candidatura').first().json.body || $('Webhook Candidatura').first().json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst auds = Array.isArray(b.audios) ? b.audios : [];\n\nlet ids = [];\ntry { ids = $('Agregar Links').first().json.ids || []; } catch (e) { ids = []; }\nconst links = ids.filter(Boolean).map(id => 'https://drive.google.com/file/d/' + id + '/view');\n\nreturn [{ json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_audios: auds.length,\n  link_audios: links.join('\\n'),\n  cidade: b.cidade || '',\n  bairro: b.bairro || '',\n  indicado: b.indicado || '',\n  indicado_por: b.indicado_por || ''\n} }];"
       },
       "id": "map-fields",
       "name": "Montar Linha",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1440, 300]
+      "position": [
+        1440,
+        300
+      ]
     },
     {
       "parameters": {
@@ -134,42 +177,286 @@
           "mappingMode": "autoMapInputData",
           "value": {},
           "schema": [
-            { "id": "data", "displayName": "data", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "vaga", "displayName": "vaga", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "nome", "displayName": "nome", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "whatsapp", "displayName": "whatsapp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "experiencia", "displayName": "experiencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "app_rastreamento", "displayName": "app_rastreamento", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "esl", "displayName": "esl", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "regiao", "displayName": "regiao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "horario_pref", "displayName": "horario_pref", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "nota_final", "displayName": "nota_final", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "pct_triagem", "displayName": "pct_triagem", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "pct_tecnico", "displayName": "pct_tecnico", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "comunicacao", "displayName": "comunicacao", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "senso_urgencia", "displayName": "senso_urgencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "gestao_conflitos", "displayName": "gestao_conflitos", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "proatividade", "displayName": "proatividade", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "cobranca_influencia", "displayName": "cobranca_influencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "resiliencia", "displayName": "resiliencia", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "registro", "displayName": "registro", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "pct_perfil", "displayName": "pct_perfil", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "foco_perdido", "displayName": "foco_perdido", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "qtd_audios", "displayName": "qtd_audios", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "link_audios", "displayName": "link_audios", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vaga",
+              "displayName": "vaga",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "whatsapp",
+              "displayName": "whatsapp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experiencia",
+              "displayName": "experiencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "app_rastreamento",
+              "displayName": "app_rastreamento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "esl",
+              "displayName": "esl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "regiao",
+              "displayName": "regiao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "horario_pref",
+              "displayName": "horario_pref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nota_final",
+              "displayName": "nota_final",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pct_triagem",
+              "displayName": "pct_triagem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pct_tecnico",
+              "displayName": "pct_tecnico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comunicacao",
+              "displayName": "comunicacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "senso_urgencia",
+              "displayName": "senso_urgencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "gestao_conflitos",
+              "displayName": "gestao_conflitos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "proatividade",
+              "displayName": "proatividade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobranca_influencia",
+              "displayName": "cobranca_influencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "resiliencia",
+              "displayName": "resiliencia",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "registro",
+              "displayName": "registro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pct_perfil",
+              "displayName": "pct_perfil",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "foco_perdido",
+              "displayName": "foco_perdido",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "qtd_audios",
+              "displayName": "qtd_audios",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link_audios",
+              "displayName": "link_audios",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cidade",
+              "displayName": "cidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bairro",
+              "displayName": "bairro",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "indicado",
+              "displayName": "indicado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "indicado_por",
+              "displayName": "indicado_por",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
           ]
         },
-        "options": { "handlingExtraData": "ignoreIt" }
+        "options": {
+          "handlingExtraData": "ignoreIt"
+        }
       },
       "id": "sheets-append",
       "name": "Gravar na Planilha de Candidatos",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [1680, 300],
+      "position": [
+        1680,
+        300
+      ],
       "credentials": {
-        "googleSheetsOAuth2Api": { "id": "U19EKQk0BfI6Usmr", "name": "automacao.ia@mandalog.com.br" }
+        "googleSheetsOAuth2Api": {
+          "id": "U19EKQk0BfI6Usmr",
+          "name": "automacao.ia@mandalog.com.br"
+        }
       }
     },
     {
@@ -182,7 +469,10 @@
       "name": "Responder ao Portal",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [1920, 300]
+      "position": [
+        1920,
+        300
+      ]
     },
     {
       "parameters": {
@@ -195,24 +485,111 @@
       "name": "LEIA-ME",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [460, 480]
+      "position": [
+        460,
+        480
+      ]
     }
   ],
   "connections": {
-    "Webhook Candidatura": { "main": [[{ "node": "Gravou Audio?", "type": "main", "index": 0 }]] },
-    "Gravou Audio?": {
+    "Webhook Candidatura": {
       "main": [
-        [{ "node": "Separar Audios", "type": "main", "index": 0 }],
-        [{ "node": "Montar Linha", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Gravou Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Separar Audios": { "main": [[{ "node": "Gerar Arquivo de Audio", "type": "main", "index": 0 }]] },
-    "Gerar Arquivo de Audio": { "main": [[{ "node": "Subir Audio no Drive", "type": "main", "index": 0 }]] },
-    "Subir Audio no Drive": { "main": [[{ "node": "Agregar Links", "type": "main", "index": 0 }]] },
-    "Agregar Links": { "main": [[{ "node": "Montar Linha", "type": "main", "index": 0 }]] },
-    "Montar Linha": { "main": [[{ "node": "Gravar na Planilha de Candidatos", "type": "main", "index": 0 }]] },
-    "Gravar na Planilha de Candidatos": { "main": [[{ "node": "Responder ao Portal", "type": "main", "index": 0 }]] }
+    "Gravou Audio?": {
+      "main": [
+        [
+          {
+            "node": "Separar Audios",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Montar Linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Audios": {
+      "main": [
+        [
+          {
+            "node": "Gerar Arquivo de Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar Arquivo de Audio": {
+      "main": [
+        [
+          {
+            "node": "Subir Audio no Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir Audio no Drive": {
+      "main": [
+        [
+          {
+            "node": "Agregar Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar Links": {
+      "main": [
+        [
+          {
+            "node": "Montar Linha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Linha": {
+      "main": [
+        [
+          {
+            "node": "Gravar na Planilha de Candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar na Planilha de Candidatos": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" },
+  "settings": {
+    "executionOrder": "v1"
+  },
   "active": false
 }
