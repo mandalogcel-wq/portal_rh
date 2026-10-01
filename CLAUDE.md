@@ -70,6 +70,12 @@ for conta dele (logins/credenciais); o resto execute.
     informar as chaves da Z-API. O gestor já está definido: **Rodrigo Freitas —
     rodrigo.freitas@mandalog.com.br** (const `GESTOR` no `public/index.html`). Gestor
     único, então não há rodízio; o sorteio aleatório que existia foi removido.
+  - **Aviso no grupo do WhatsApp ✅ FEITO.** Instância Z-API `3F433452...` (Supley),
+    credencial do Client-Token no n8n: **"Header Auth account"** (`UitEFSpGVNbn30ZQ`),
+    header `Client-Token`. Grupo: **Reestruturação 3C - GRU**
+    (`120363430026918823-group`). O número da instância (11988957042) já é membro.
+    Nada precisa ser configurado nos webhooks da Z-API — só enviamos, não recebemos.
+    Testado: `200 OK`, mensagem entregue no grupo.
   - **Z-API:** o Marcus optou por reaproveitar a instância **"Supley"**, que está
     conectada e ociosa. Consequência aceita por ele: as mensagens do RH saem pelo número
     do Supley, e um eventual bloqueio da Meta por uso de API não oficial atinge os dois

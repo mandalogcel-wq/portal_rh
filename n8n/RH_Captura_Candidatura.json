@@ -220,6 +220,43 @@
           "id": "U19EKQk0BfI6Usmr",
           "name": "automacao.ia@mandalog.com.br"
         }
+      },
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.z-api.io/instances/3F43345285C471E54550E6B1C9468980/token/97BB3194EB37842D3D161CCE/send-text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ phone: '120363430026918823-group', message: '*Nova entrevista agendada — Portal RH*\\n\\n*Candidato:* ' + ($('Webhook Candidatura').first().json.body.nome || '') + '\\n*Vaga:* ' + ($('Webhook Candidatura').first().json.body.vaga || '') + '\\n*Quando:* ' + ($('Webhook Candidatura').first().json.body.entrevista_em || '') + '\\n*Gestor:* ' + ($('Webhook Candidatura').first().json.body.gestor || '') + '\\n*WhatsApp do candidato:* ' + ($('Webhook Candidatura').first().json.body.telefone || '') + '\\n*Nota final:* ' + ($('Webhook Candidatura').first().json.body.nota_final ?? '') + '/100' }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "avisar-grupo",
+      "name": "Avisar Grupo no WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        880,
+        640
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "UitEFSpGVNbn30ZQ",
+          "name": "Header Auth account"
+        }
       }
     },
     {
@@ -813,7 +850,7 @@
       "main": [
         [
           {
-            "node": "Responder ao Portal",
+            "node": "Avisar Grupo no WhatsApp",
             "type": "main",
             "index": 0
           }
@@ -854,6 +891,17 @@
         [
           {
             "node": "Responder Verificacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar Grupo no WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Portal",
             "type": "main",
             "index": 0
           }

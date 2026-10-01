@@ -460,18 +460,20 @@ function screenAgenda(){st.screen='agenda';
   conf.disabled=true;conf.textContent='Enviando...';
   const slot=genSlots().find(s=>s.id===sel);
   const quando=slot.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+slot.time;
-  enviarAgendamento(slot,quando);
+  enviarAgendamento(slot,quando,nota);
   app.innerHTML=`<div class="card"><div class="eyebrow">Horário reservado</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
    <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
    <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou, com o convite da agenda e o link da chamada. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
    ${blocoAjuda()}</div>`;};}
 
 /* Manda o horário escolhido para o n8n (mesmo endpoint, tipo diferente) */
-async function enviarAgendamento(slot,quando){
+async function enviarAgendamento(slot,quando,nota){
   try{
     await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({tipo:'agendamento',vaga:VAGA.titulo,nome:st.cand.nome,email:st.cand.email,
-        telefone:st.cand.telefone,slot_id:slot.id,entrevista_iso:slot.date.toISOString().slice(0,10)+'T'+slot.time+':00',
+        telefone:st.cand.telefone,cidade:st.cand.cidade,bairro:st.cand.bairro,
+        nota_final:nota,gestor:GESTOR.nome,gestor_email:GESTOR.email,
+        slot_id:slot.id,entrevista_iso:slot.date.toISOString().slice(0,10)+'T'+slot.time+':00',
         entrevista_em:quando,data:new Date().toISOString()})});
   }catch(e){ /* best-effort */ }
 }
