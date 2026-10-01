@@ -33,10 +33,14 @@ for conta dele (logins/credenciais); o resto execute.
 - A URL de produção do webhook não fica no repositório: ela é o valor de
   `N8N_WEBHOOK_CANDIDATURA` na Vercel (ver Passo 4).
 
-## Passo 4 — Vercel
-- `vercel link` (org/projeto a confirmar com o Marcus).
-- Definir env var de produção: `N8N_WEBHOOK_CANDIDATURA` = URL do passo 3.
-- `vercel --prod`. Garantir que `/` serve o portal e `/api/candidatura` responde.
+## Passo 4 — Vercel ✅ FEITO
+- Projeto `portal_rh` em "Mandalog's projects" (plano Hobby), ligado ao repositório
+  GitHub. Branch de produção: `claude/fervent-hopper-abgox5` (é a default do repo).
+- URL: https://portalrh-delta.vercel.app
+- Env var `N8N_WEBHOOK_CANDIDATURA` definida em Production e Preview.
+- Sem build: a Vercel serve `public/` como estático e `api/` como função.
+- Domínio próprio (ex.: vagas.mandalog.com.br) ainda não configurado — se for usar,
+  adicionar em Domains **deste** projeto, não no `mandalog-cmd`.
 
 ## Passo 5 — Teste de ponta a ponta
 - A gravação já foi testada direto no webhook (payload completo → linha na planilha).
