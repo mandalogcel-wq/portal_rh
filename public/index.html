@@ -391,9 +391,19 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
  if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Agendar minha entrevista';b.onclick=screenAgenda;cta.appendChild(b);}
  else{cta.innerHTML=`<div class="okbox" style="background:#F1F5F9;border-color:#E2E8F0;color:#475569">Recebemos a sua candidatura. Vamos analisar o seu resultado e, havendo aderência, o RH entra em contato pelo WhatsApp.</div>`;}}
 
-/* ===== AGENDAMENTO (protótipo; trava real via n8n + Google Calendar) ===== */
-function genSlots(){const out=[];const base=new Date();base.setHours(0,0,0,0);let d=new Date(base);let added=0;
- while(added<8){d.setDate(d.getDate()+1);const wd=d.getDay();if(wd===0||wd===6)continue;['10:00','14:00','16:00'].forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h,date:new Date(d),time:h}));added++;}
+/* ===== AGENDAMENTO (trava real via n8n + Google Calendar) =====
+   Entrevistas das 14h às 16h, de 30 em 30 minutos, em dias úteis. */
+const AGENDA={inicio:'14:00',fim:'16:00',passo:30,duracao:30,dias:5,sabado:false};
+function horariosDoDia(){const out=[];
+ const [hi,mi]=AGENDA.inicio.split(':').map(Number),[hf,mf]=AGENDA.fim.split(':').map(Number);
+ for(let m=hi*60+mi;m<=hf*60+mf;m+=AGENDA.passo){
+  out.push(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));}
+ return out;}
+function genSlots(){const out=[],horas=horariosDoDia();
+ const base=new Date();base.setHours(0,0,0,0);let d=new Date(base);let added=0,guarda=0;
+ while(added<AGENDA.dias&&guarda++<60){d.setDate(d.getDate()+1);const wd=d.getDay();
+  if(wd===0||(wd===6&&!AGENDA.sabado))continue;
+  horas.forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h,date:new Date(d),time:h}));added++;}
  return out;}
 function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken')||'[]'));}catch(e){return new Set();}}
 function saveTaken(s){try{localStorage.setItem('mdl_slots_taken',JSON.stringify([...s]));}catch(e){}}

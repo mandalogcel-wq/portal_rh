@@ -67,9 +67,12 @@ for conta dele (logins/credenciais); o resto execute.
     WhatsApp.
   - Falta (depende do Marcus): conectar a credencial do **Google Calendar** no n8n e
     informar **instance, token e client-token da Z-API** mais o **ID do grupo**; e
-    definir os **gestores reais** (nome + e-mail) e a grade de horários — hoje
-    `genSlots()` gera 10h/14h/16h em dias úteis e o gestor era sorteado entre dois nomes
-    fixos (esse sorteio foi removido).
+    definir os **gestores reais** (nome + e-mail). O sorteio aleatório do gestor foi
+    removido.
+  - Grade definida pelo Marcus: **14h às 16h, de 30 em 30 minutos** (14:00, 14:30, 15:00,
+    15:30, 16:00), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
+    `public/index.html` — para mudar janela, passo, número de dias ou incluir sábado,
+    basta alterar ali.
   - Com isso ligado: criar o evento no Calendar com candidato e gestor convidados e
     `conferenceData` para o Meet, gravar `meet_link`/`evento_id`/`entrevista_gestor` na
     planilha, ler os horários livres da agenda real (trava entre candidatos) e postar o
