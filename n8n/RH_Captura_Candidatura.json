@@ -1,0 +1,79 @@
+{
+  "name": "RH - Captura de Candidatura (Portal SAC)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rh-candidatura",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-candidatura",
+      "name": "Webhook Candidatura",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "rh-candidatura"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Achata o payload do portal para uma linha de planilha.\nconst b = $json.body || $json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst vids = Array.isArray(b.videos) ? b.videos : [];\n\nreturn { json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_videos: vids.length\n} };"
+      },
+      "id": "map-fields",
+      "name": "Montar Linha",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "COLE_AQUI_O_ID_DA_PLANILHA", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Candidatos", "mode": "name" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "sheets-append",
+      "name": "Google Sheets (Append)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"ok\": true } }}",
+        "options": {}
+      },
+      "id": "responder",
+      "name": "Responder",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Captura de Candidatura — Portal SAC\n\n1. Importe este workflow no n8n.\n2. Reconecte a credencial do **Google Sheets** no nó Append (importar sempre perde a credencial).\n3. Troque `COLE_AQUI_O_ID_DA_PLANILHA` pelo ID da planilha de candidatos.\n4. Publique (Active) e copie a URL do webhook: `/webhook/rh-candidatura`.\n5. Cole essa URL na variável `N8N_WEBHOOK_CANDIDATURA` da Vercel.\n\n**Opcional (vídeo):** adicionar um nó Google Drive para salvar `videos[].dataUrl` (base64) e gravar o link na planilha. Ver docs/passo-a-passo.md.",
+        "height": 300,
+        "width": 420
+      },
+      "id": "nota",
+      "name": "LEIA-ME",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 480]
+    }
+  ],
+  "connections": {
+    "Webhook Candidatura": { "main": [[{ "node": "Montar Linha", "type": "main", "index": 0 }]] },
+    "Montar Linha": { "main": [[{ "node": "Google Sheets (Append)", "type": "main", "index": 0 }]] },
+    "Google Sheets (Append)": { "main": [[{ "node": "Responder", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portal do Candidato — Mandalog · SAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A4A;--orange:#E8751A;--bg:#F7F8FA;--surface:#FFFFFF;--ink:#1B2A4A;--muted:#64748B;--line:#E6E9EF;--danger:#DC2626;--ok:#059669;--shadow:0 10px 30px rgba(27,42,74,.08);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3{font-family:'Outfit',system-ui,sans-serif;margin:0;line-height:1.15}
+.wrap{max-width:720px;margin:0 auto;padding:20px 18px 64px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(247,248,250,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:720px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;gap:14px}
+.brand{display:flex;align-items:center;gap:9px;font-family:'Outfit';font-weight:800;color:var(--navy);font-size:15px;letter-spacing:.2px}
+.brand .dot{width:11px;height:11px;border-radius:3px;background:var(--orange)}
+.stepnote{margin-left:auto;font-size:12px;color:var(--muted);font-weight:500}
+.progress{height:4px;background:var(--line);border-radius:99px;overflow:hidden;max-width:720px;margin:0 auto}
+.progress>i{display:block;height:100%;width:0;background:var(--orange);transition:width .35s ease}
+.timer{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
+.timer .ring{position:relative;width:48px;height:48px;flex:0 0 auto}.timer .ring svg{transform:rotate(-90deg)}
+.timer .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:700;font-size:15px;color:var(--navy)}
+.timer .lbl{font-size:13px;color:var(--muted)}.timer .lbl b{display:block;font-family:'Outfit';font-size:14px;color:var(--ink);font-weight:600}
+.timer.warn{border-color:#FCD9B6}.timer.warn .num{color:var(--orange)}
+.timer.crit{border-color:#F6B5B5;animation:pulse 1s infinite}.timer.crit .num{color:var(--danger)}
+@keyframes pulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(220,38,38,.12)}}
+@media (prefers-reduced-motion:reduce){.timer.crit{animation:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:var(--shadow)}
+.eyebrow{font-size:12.5px;color:var(--orange);font-weight:600;margin-bottom:10px}
+.q-title{font-size:19.5px;font-weight:700;color:var(--navy);margin-bottom:20px}.q-title .qcount{color:var(--muted);font-weight:600;font-size:14px}
+.opt{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:11px;cursor:pointer;transition:border-color .15s,background .15s;background:#fff}
+.opt:hover{border-color:#C9D2E0}.opt.sel{border-color:var(--orange);background:#FFF7EF}
+.opt .mk{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;margin-top:1px;font-size:12px;font-weight:700;color:#fff;font-family:'Outfit'}
+.opt.sel .mk{background:var(--orange);border-color:var(--orange)}.opt .txt{font-size:15px}
+.likert{display:flex;gap:8px;justify-content:space-between;margin:6px 0 4px}
+.lk{flex:1;border:1.5px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;padding:16px 4px;text-align:center;font-family:'Outfit';font-weight:700;color:var(--navy);font-size:16px;transition:.15s}
+.lk:hover{border-color:#C9D2E0}.lk.sel{border-color:var(--orange);background:var(--orange);color:#fff}
+.lk-ends{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:2px}
+.fc{display:grid;gap:12px}.fc .opt{padding:18px 16px;font-size:15.5px}.fc .opt .mk{background:#eef1f6;color:var(--navy)}.fc .opt.sel .mk{background:var(--orange);color:#fff}
+.btn{appearance:none;border:0;border-radius:12px;font-family:'Outfit';font-weight:600;font-size:16px;padding:15px 22px;cursor:pointer;transition:transform .05s,background .15s;width:100%}
+.btn-primary{background:var(--orange);color:#fff}.btn-primary:hover{background:#d76a12}.btn-primary:active{transform:scale(.99)}.btn-primary:disabled{background:#E7CBB0;cursor:not-allowed}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line)}.btn-row{margin-top:22px}
+label.f{display:block;font-size:13px;color:var(--muted);font-weight:500;margin:14px 0 6px}
+input.f,select.f{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;font-family:'Inter';color:var(--ink);background:#fff}
+input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
+.hero h1{font-size:28px;color:var(--navy);margin-bottom:8px;letter-spacing:-.3px}
+.hero .role{display:inline-block;background:var(--navy);color:#fff;font-family:'Outfit';font-weight:600;font-size:13px;padding:6px 12px;border-radius:8px;margin-bottom:18px}
+.lead{color:var(--muted);font-size:15.5px;margin-bottom:22px}
+.steps{display:grid;gap:10px;margin:20px 0}
+.stepitem{display:flex;gap:13px;align-items:center;padding:13px 15px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.stepitem .n{flex:0 0 auto;width:30px;height:30px;border-radius:9px;background:#FFF1E4;color:var(--orange);font-family:'Outfit';font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.stepitem .d{font-size:14.5px}.stepitem .d b{display:block;font-family:'Outfit';color:var(--navy);font-weight:600}
+.rules{background:#FFF7EF;border:1px solid #FCD9B6;border-radius:12px;padding:15px 16px;font-size:13.5px;color:#7a4a17;margin:18px 0}
+.rules b{color:#8a4a10}.rules ul{margin:8px 0 0;padding-left:18px}.rules li{margin:4px 0}
+.videobox{background:#0d1526;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center}
+.videobox video{width:100%;height:100%;object-fit:cover}.videobox .ph{color:#8896b3;font-size:14px;text-align:center;padding:20px}
+.rec-dot{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.5);color:#fff;padding:5px 11px;border-radius:99px;font-size:12px;font-weight:600}
+.rec-dot i{width:9px;height:9px;border-radius:50%;background:#ff4d4d;animation:blink 1s infinite}@keyframes blink{50%{opacity:.25}}
+.scorebig{font-family:'Outfit';font-weight:800;font-size:46px;color:var(--navy);line-height:1}
+.badge{display:inline-block;font-family:'Outfit';font-weight:700;font-size:13px;padding:7px 14px;border-radius:99px}
+.badge.pri{background:#DCFCE7;color:#166534}.badge.rec{background:#FEF3C7;color:#92400E}.badge.ana{background:#E2E8F0;color:#475569}
+.dimrow{margin:11px 0}.dimrow .top{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px}
+.dimrow .top b{font-family:'Outfit';color:var(--navy);font-weight:600}.dimrow .top span{color:var(--muted);font-weight:600}
+.bar{height:9px;background:var(--line);border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:linear-gradient(90deg,#E8751A,#F2A05A);border-radius:99px}
+.sectile{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}.sectile:last-child{border:0}.sectile b{font-family:'Outfit';color:var(--navy)}
+.payload{background:#0d1526;color:#9fb3d1;border-radius:12px;padding:16px;font-family:ui-monospace,monospace;font-size:11.5px;overflow-x:auto;white-space:pre;margin-top:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--danger);color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%}
+.toast.show{opacity:1}.hide{display:none !important}.small{font-size:12.5px;color:var(--muted)}
+.radar{display:block;margin:6px auto 2px}
+.slotday{margin:14px 0 4px;font-family:'Outfit';font-weight:700;color:var(--navy);font-size:14px}
+.slots{display:flex;flex-wrap:wrap;gap:9px}
+.slot{border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;font-family:'Outfit';font-weight:600;color:var(--navy);cursor:pointer;background:#fff;font-size:14px;transition:.15s}
+.slot:hover{border-color:var(--orange)}.slot.sel{background:var(--orange);color:#fff;border-color:var(--orange)}
+.slot.taken{opacity:.4;text-decoration:line-through;cursor:not-allowed}
+.okbox{background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:16px;color:#065F46;font-size:14.5px}
+.okbox b{font-family:'Outfit'}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner"><div class="brand"><span class="dot"></span> MANDALOG</div><div class="stepnote" id="stepnote"></div></div><div class="progress"><i id="progbar"></i></div></div>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ===== VAGA ===== */
+const VAGA={titulo:"Assistente de SAC — Monitoramento de Entregas",local:"Bonsucesso, Guarulhos/SP · 2 vagas",
+  webhook:"https://mandalog.app.n8n.cloud/webhook/nova_candidatura_wk_qMc4XllfRgWEhjrb",
+  corte:85};
+/* 7 competências da descrição do cargo */
+const DIMS={COM:"Comunicação clara",URG:"Senso de urgência",CONF:"Gestão de conflitos",PRO:"Proatividade",COB:"Cobrança e influência",RES:"Resiliência",REG:"Capricho no registro"};
+
+/* ===== TRIAGEM (não cronometrada; pontua requisitos) ===== */
+const TRIAGEM=[
+  {id:"exp",label:"Você tem experiência em SAC ou torre de controle de distribuição urbana (last mile)?",
+    op:[["Mais de 1 ano",3],["De 6 meses a 1 ano",2],["Menos de 6 meses",1],["Não tenho",0]]},
+  {id:"app",label:"Qual aplicativo de rastreamento de entregas você já usou no dia a dia?",
+    op:[["GreenMile",3],["Outro app de rastreamento",2],["Nunca usei",0]]},
+  {id:"esl",label:"Você já trabalhou com o ESL?",op:[["Sim",2],["Não",0]]},
+  {id:"bairro",label:"Em qual região você mora?",
+    op:[["Bonsucesso, Pimentas, Pres. Dutra ou arredores",2],["Outro bairro de Guarulhos",1],["Outra cidade",0]]},
+  {id:"horario",label:"Qual horário você prefere? (sexta, 1h mais cedo)",score:false,
+    op:[["07h às 17h",0],["09h às 19h",0],["Tanto faz",0]]}
+];
+const TRIAGEM_MAX=TRIAGEM.filter(t=>t.score!==false).reduce((a,t)=>a+Math.max(...t.op.map(o=>o[1])),0);
+
+/* ===== SEÇÕES CRONOMETRADAS ===== */
+const SECOES=[
+  {id:"tecnico",nome:"Teste Técnico e Prático",eyebrow:"Conhecimento e procedimento do SAC (há resposta correta)",tempo:55,tipo:"mcq",
+   questoes:[
+    {q:"Um veículo está parado há 70 minutos no cliente, sem atualização no app. Sua primeira ação é:",op:[
+      {t:"Esperar completar 2 horas antes de agir"},
+      {t:"Contatar o motorista na hora, entender a causa e avisar o cliente se afetar a janela",correta:true},
+      {t:"Abrir a ocorrência só no fechamento do dia"},
+      {t:"Aguardar o cliente reclamar primeiro"}]},
+    {q:"O motorista precisa fazer uma descarga em rota. O procedimento correto é:",op:[
+      {t:"Deixar o motorista pagar e resolver depois"},
+      {t:"Solicitar a autorização ao cliente ANTES do pagamento, orientar o motorista e lançar o comprovante no ESL",correta:true},
+      {t:"Autorizar por telefone, sem registrar"},
+      {t:"Mandar direto para a prestação de contas no fim do mês"}]},
+    {q:"Uma reentrega foi acordada com o cliente. Para a operação poder cobrá-la, você precisa:",op:[
+      {t:"Apenas anotar num caderno de controle"},
+      {t:"Registrar a senha de reentrega no ESL e no GreenMile, vinculada à nota fiscal",correta:true},
+      {t:"Avisar o motorista verbalmente"},
+      {t:"Nada — a cobrança é automática pelo sistema"}]},
+    {q:"Chega um alerta do gerenciamento de risco (desvio de rota). O correto é:",op:[
+      {t:"Tratar em até 5 minutos com a central da gerenciadora e acionar o gestor em caso de desvio ou sinistro",correta:true},
+      {t:"Esperar o motorista ligar explicando"},
+      {t:"Registrar e tratar no dia seguinte"},
+      {t:"Ignorar se o veículo voltar sozinho à rota"}]},
+    {q:"Uma entrega foi frustrada (ponto de venda fechado). O que não pode faltar?",op:[
+      {t:"Reagendar a entrega sem registrar nada"},
+      {t:"Registrar a causa da frustração na ocorrência",correta:true},
+      {t:"Apenas avisar o motorista para seguir"},
+      {t:"Deixar para resolver no fechamento do mês"}]},
+    {q:"Pela regra da operação, o prazo máximo para responder uma mensagem de motorista ou cliente é:",op:[
+      {t:"1 hora"},{t:"15 minutos",correta:true},{t:"Até o fim do turno"},{t:"Não há prazo definido"}]},
+    {q:"Ao terminar o seu turno, antes de sair, você precisa:",op:[
+      {t:"Apenas desligar o computador"},
+      {t:"Passar por escrito as entregas ainda em rota e as pendências ao próximo responsável",correta:true},
+      {t:"Avisar o colega verbalmente o que ficou pendente"},
+      {t:"Deixar as pendências registradas para o dia seguinte"}]}
+   ]},
+  {id:"comportamento",nome:"Comportamento",eyebrow:"O quanto combina com você (não há resposta certa)",tempo:30,tipo:"likert",
+   questoes:[
+    {t:"Escrevo mensagens curtas e objetivas: digo o que houve, o que estou fazendo e quando dou retorno.",dim:"COM"},
+    {t:"Quando algo trava uma entrega, trato na hora — não deixo para depois.",dim:"URG"},
+    {t:"Mantenho a calma com motorista irritado ou cliente cobrando, e foco na solução, não no culpado.",dim:"CONF"},
+    {t:"Costumo agir antes de o problema estourar: ligo para o motorista parado sem ninguém pedir.",dim:"PRO"},
+    {t:"Cobro senha, comprovante e resposta com firmeza e respeito, sem precisar escalar para o chefe.",dim:"COB"},
+    {t:"Nos dias de pico eu perco o ritmo e demoro a me recuperar depois de um erro.",dim:"RES",rev:true},
+    {t:"Registro tudo no sistema no mesmo dia: causa, senha e comprovante.",dim:"REG"}
+   ]},
+  {id:"valores",nome:"Valores no trabalho",eyebrow:"O que mais combina com você (as duas são boas; não há certo)",tempo:25,tipo:"fc",
+   questoes:[
+    {a:{t:"Respondo rápido, mesmo que a mensagem seja curta.",dim:"URG"},b:{t:"Registro tudo com capricho, mesmo que leve mais tempo.",dim:"REG"}},
+    {a:{t:"Me sinto bem quando acalmo um conflito.",dim:"CONF"},b:{t:"Me sinto bem quando antecipo um problema.",dim:"PRO"}},
+    {a:{t:"Insisto até conseguir o retorno do motorista ou do cliente.",dim:"COB"},b:{t:"Mantenho a cabeça fria quando tudo acontece ao mesmo tempo.",dim:"RES"}},
+    {a:{t:"Comunico de forma clara e sem ruído.",dim:"COM"},b:{t:"Trato primeiro o que trava a entrega.",dim:"URG"}}
+   ]}
+];
+const VIDEO={nome:"Entrevista em Vídeo",eyebrow:"Entrevista gravada",tempo:75,
+  questoes:["Conte uma situação real em que um cliente ou motorista estava irritado e você resolveu. O que você fez e falou, na prática?",
+            "Num dia de pico, com várias ocorrências ao mesmo tempo, como você se organiza para não deixar nada sem resposta?"]};
+
+/* ===== ESTADO ===== */
+const st={cand:{},triagem:{},secIdx:0,qIdx:0,respostas:{},videoIdx:0,videoBlobs:[],focoPerdido:0,timer:null,timeLeft:0,screen:""};
+SECOES.forEach(s=>st.respostas[s.id]=[]);
+const app=document.getElementById('app'),toastEl=document.getElementById('toast');let toastT=null;
+function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('show'),2600);}
+const totalItens=SECOES.reduce((a,s)=>a+s.questoes.length,0);
+const totalPassos=1+1+totalItens+VIDEO.questoes.length+1;
+function setProgress(step,label){document.getElementById('progbar').style.width=Math.min(100,(step/totalPassos)*100)+'%';document.getElementById('stepnote').textContent=label||'';}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&['q','video'].includes(st.screen)){st.focoPerdido++;toast('Saída de tela detectada e registrada.');}});
+function val(id){return document.getElementById(id).value.trim();}
+
+/* ===== INTRO ===== */
+function screenIntro(){st.screen='intro';setProgress(0,'');
+ app.innerHTML=`<div class="card hero"><span class="role">${VAGA.titulo} · ${VAGA.local}</span>
+  <h1>Processo seletivo Mandalog</h1>
+  <p class="lead">Você vai acompanhar entregas em rota, tratar ocorrências e manter cliente e motoristas informados. Esta avaliação é rápida e cronometrada. Só a parte técnica tem resposta certa — o resto mostra o seu jeito de trabalhar.</p>
+  <div class="steps">
+   <div class="stepitem"><div class="n">1</div><div class="d"><b>Triagem</b>Experiência e perfil para a vaga</div></div>
+   <div class="stepitem"><div class="n">2</div><div class="d"><b>Teste técnico e prático</b>Situações reais do SAC</div></div>
+   <div class="stepitem"><div class="n">3</div><div class="d"><b>Comportamento e valores</b>Como você age no dia a dia</div></div>
+   <div class="stepitem"><div class="n">4</div><div class="d"><b>Entrevista em vídeo</b>Você responde em vídeo, na hora</div></div></div>
+  <div class="rules"><b>Como funciona:</b><ul>
+   <li>Cada pergunta do teste tem <b>tempo limite</b>. Se o tempo acabar, avança sozinho.</li>
+   <li>Não dá para voltar para uma pergunta anterior.</li>
+   <li>No perfil não existe resposta certa — seja você mesmo.</li>
+   <li>Quem tiver o melhor resultado já agenda a entrevista com um gestor ao final.</li></ul></div>
+  <div class="btn-row"><button class="btn btn-primary" id="go">Começar</button></div></div>`;
+ document.getElementById('go').onclick=screenDados;}
+
+function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
+ app.innerHTML=`<div class="card"><div class="eyebrow">Antes de começar</div><h2 class="q-title">Seus dados de contato</h2>
+  <label class="f">Nome completo</label><input class="f" id="nome" autocomplete="name">
+  <label class="f">WhatsApp (com DDD)</label><input class="f" id="fone" inputmode="tel" placeholder="(11) 90000-0000">
+  <label class="f">E-mail</label><input class="f" id="email" inputmode="email" autocomplete="email">
+  <div class="btn-row"><button class="btn btn-primary" id="go">Continuar</button></div></div>`;
+ document.getElementById('go').onclick=()=>{const nome=val('nome'),fone=val('fone'),email=val('email');
+  if(!nome||!fone||!email){toast('Preencha nome, WhatsApp e e-mail.');return;}
+  st.cand={nome,telefone:fone,email};screenTriagem();};}
+
+/* ===== TRIAGEM ===== */
+function screenTriagem(){st.screen='triagem';setProgress(1,'Triagem');
+ let html=`<div class="card"><div class="eyebrow">Etapa 1 — Triagem</div><h2 class="q-title">Algumas perguntas rápidas</h2>`;
+ TRIAGEM.forEach(t=>{html+=`<label class="f">${t.label}</label><select class="f" id="tg_${t.id}"><option value="">Selecione...</option>${t.op.map((o,i)=>`<option value="${i}">${o[0]}</option>`).join('')}</select>`;});
+ html+=`<div class="btn-row"><button class="btn btn-primary" id="go">Iniciar avaliação</button></div></div>`;
+ app.innerHTML=html;
+ document.getElementById('go').onclick=()=>{
+   for(const t of TRIAGEM){const v=document.getElementById('tg_'+t.id).value;if(v===''){toast('Responda todas as perguntas da triagem.');return;}st.triagem[t.id]=+v;}
+   st.secIdx=0;st.qIdx=0;runItem();};}
+
+/* ===== RUNNER ===== */
+function runItem(){const sec=SECOES[st.secIdx],it=sec.questoes[st.qIdx];st.screen='q';
+ const passo=2+SECOES.slice(0,st.secIdx).reduce((a,s)=>a+s.questoes.length,0)+st.qIdx+1;setProgress(passo,sec.nome);
+ let sel=null;
+ const timerHTML=`<div class="timer" id="timer"><div class="ring"><svg width="48" height="48"><circle cx="24" cy="24" r="20" stroke="#E6E9EF" stroke-width="4" fill="none"></circle><circle id="ringfg" cx="24" cy="24" r="20" stroke="#E8751A" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="125.6" stroke-dashoffset="0"></circle></svg><div class="num" id="tnum">${sec.tempo}</div></div><div class="lbl">Tempo para responder<b id="tlbl">${sec.tempo}s restantes</b></div></div>`;
+ const head=`<div class="eyebrow">${sec.eyebrow}</div>`,count=`<span class="qcount">Pergunta ${st.qIdx+1} de ${sec.questoes.length}</span>`;
+ let body='';
+ if(sec.tipo==='mcq'){body=`${head}<h2 class="q-title">${count}<br>${it.q}</h2><div id="opts"></div>`;}
+ else if(sec.tipo==='likert'){body=`${head}<h2 class="q-title">${count}<br>${it.t}</h2><div class="likert" id="lk">${[1,2,3,4,5].map(n=>`<div class="lk" data-v="${n-1}">${n}</div>`).join('')}</div><div class="lk-ends"><span>Não combina</span><span>Combina muito</span></div>`;}
+ else if(sec.tipo==='fc'){body=`${head}<h2 class="q-title">${count}<br>O que mais combina com você?</h2><div class="fc" id="fc"><div class="opt" data-v="0"><div class="mk">A</div><div class="txt">${it.a.t}</div></div><div class="opt" data-v="1"><div class="mk">B</div><div class="txt">${it.b.t}</div></div></div>`;}
+ app.innerHTML=timerHTML+`<div class="card">${body}<div class="btn-row"><button class="btn btn-primary" id="next" disabled>Próxima</button></div></div>`;
+ const next=document.getElementById('next');
+ function pick(v,el,g){sel=v;g.forEach(c=>c.classList.remove('sel'));el.classList.add('sel');next.disabled=false;}
+ if(sec.tipo==='mcq'){const o=document.getElementById('opts');it.op.forEach((op,i)=>{const d=document.createElement('div');d.className='opt';d.innerHTML=`<div class="mk">${String.fromCharCode(65+i)}</div><div class="txt">${op.t}</div>`;d.onclick=()=>pick(i,d,[...o.children]);o.appendChild(d);});}
+ else if(sec.tipo==='likert'){const g=[...document.querySelectorAll('#lk .lk')];g.forEach(el=>el.onclick=()=>pick(+el.dataset.v,el,g));}
+ else if(sec.tipo==='fc'){const g=[...document.querySelectorAll('#fc .opt')];g.forEach(el=>el.onclick=()=>pick(+el.dataset.v,el,g));}
+ next.onclick=()=>commit(sel);startTimer(sec.tempo,()=>commit(sel));}
+function commit(sel){clearInterval(st.timer);const sec=SECOES[st.secIdx];st.respostas[sec.id][st.qIdx]=(sel==null?null:sel);
+ if(st.qIdx<sec.questoes.length-1){st.qIdx++;runItem();}else if(st.secIdx<SECOES.length-1){st.secIdx++;st.qIdx=0;runItem();}else{st.videoIdx=0;runVideo();}}
+function startTimer(secs,onEnd){st.timeLeft=secs;const box=document.getElementById('timer'),num=document.getElementById('tnum'),lbl=document.getElementById('tlbl'),fg=document.getElementById('ringfg'),C=125.6;
+ const tick=()=>{num.textContent=st.timeLeft;lbl.textContent=st.timeLeft+'s restantes';fg.style.strokeDashoffset=C*(1-st.timeLeft/secs);box.classList.toggle('warn',st.timeLeft<=Math.ceil(secs*.4)&&st.timeLeft>8);box.classList.toggle('crit',st.timeLeft<=8);if(st.timeLeft<=0){clearInterval(st.timer);toast('Tempo esgotado — avançando.');onEnd();return;}st.timeLeft--;};
+ tick();st.timer=setInterval(tick,1000);}
+
+/* ===== VÍDEO ===== */
+let mediaStream=null,recorder=null,chunks=[];
+function runVideo(){st.screen='video';const passo=2+totalItens+st.videoIdx+1;setProgress(passo,VIDEO.nome);const p=VIDEO.questoes[st.videoIdx];
+ app.innerHTML=`<div class="card"><div class="eyebrow">${VIDEO.eyebrow} — ${st.videoIdx+1} de ${VIDEO.questoes.length}</div><h2 class="q-title" style="margin-bottom:16px">${p}</h2>
+  <div class="videobox" id="vbox"><video id="preview" autoplay muted playsinline class="hide"></video><div class="ph" id="vph">Clique em <b>Ativar câmera</b> para gravar.<br><span class="small">Você terá ${VIDEO.tempo}s. Encerra sozinho.</span></div><div class="rec-dot hide" id="recdot"><i></i><span id="rectime">${VIDEO.tempo}s</span></div></div>
+  <div class="btn-row"><button class="btn btn-ghost" id="cam">Ativar câmera</button></div><div id="ctrls" class="hide" style="margin-top:11px"><button class="btn btn-primary" id="rec">Gravar resposta</button></div><p class="small" id="vhint" style="margin-top:12px"></p></div>`;
+ document.getElementById('cam').onclick=enableCam;}
+async function enableCam(){try{mediaStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});const v=document.getElementById('preview');v.srcObject=mediaStream;v.classList.remove('hide');document.getElementById('vph').classList.add('hide');document.getElementById('cam').classList.add('hide');document.getElementById('ctrls').classList.remove('hide');document.getElementById('rec').onclick=startRec;}
+ catch(e){document.getElementById('vhint').innerHTML='Câmera indisponível neste ambiente de teste. Na versão publicada (Vercel) a gravação funciona normalmente.';const b=document.getElementById('cam');b.textContent='Simular gravação e continuar';b.onclick=()=>{st.videoBlobs.push({simulado:true,pergunta:st.videoIdx});nextVideo();};}}
+function startRec(){chunks=[];try{recorder=new MediaRecorder(mediaStream);}catch(e){toast('Gravação não suportada aqui.');return;}
+ recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};recorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});const rd=new FileReader();rd.onloadend=()=>{st.videoBlobs.push({pergunta:st.videoIdx,size:blob.size,dataUrl:rd.result});stopStream();nextVideo();};rd.readAsDataURL(blob);};
+ recorder.start();document.getElementById('recdot').classList.remove('hide');const rb=document.getElementById('rec');rb.textContent='Encerrar agora';rb.onclick=()=>{if(recorder.state==='recording')recorder.stop();};
+ let t=VIDEO.tempo;const rt=document.getElementById('rectime');const iv=setInterval(()=>{t--;rt.textContent=t+'s';if(t<=0){clearInterval(iv);if(recorder.state==='recording')recorder.stop();}},1000);}
+function stopStream(){if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}}
+function nextVideo(){if(st.videoIdx<VIDEO.questoes.length-1){st.videoIdx++;runVideo();}else screenResultado();}
+
+/* ===== SCORING ===== */
+function calcTriagem(){let got=0;TRIAGEM.filter(t=>t.score!==false).forEach(t=>{got+=t.op[st.triagem[t.id]][1];});return Math.round(got/TRIAGEM_MAX*100);}
+function calcTecnico(){const sec=SECOES.find(s=>s.tipo==='mcq'),r=st.respostas[sec.id];let got=0;sec.questoes.forEach((q,i)=>{const o=q.op[r[i]];if(o&&o.correta)got++;});return{got,total:sec.questoes.length,pct:Math.round(got/sec.questoes.length*100)};}
+function calcPerfil(){const got={},max={};Object.keys(DIMS).forEach(d=>{got[d]=0;max[d]=0;});
+ SECOES.forEach(sec=>{if(sec.tipo==='mcq')return;const r=st.respostas[sec.id];sec.questoes.forEach((it,i)=>{const resp=r[i];
+  if(sec.tipo==='likert'){max[it.dim]+=5;if(resp!=null){const v=resp+1;got[it.dim]+=it.rev?(6-v):v;}}
+  else if(sec.tipo==='fc'){max[it.a.dim]+=1;max[it.b.dim]+=1;if(resp!=null)got[resp===0?it.a.dim:it.b.dim]+=1;}});});
+ const prof={};Object.keys(DIMS).forEach(d=>{prof[d]=max[d]?Math.round(got[d]/max[d]*100):0;});return prof;}
+function radarSVG(prof){const keys=Object.keys(DIMS),N=keys.length,cx=140,cy=140,R=95;
+ const pt=(i,r)=>{const a=(-90+i*360/N)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+ let grid='';[.25,.5,.75,1].forEach(f=>{grid+=`<polygon points="${keys.map((k,i)=>pt(i,R*f).join(',')).join(' ')}" fill="none" stroke="#E6E9EF" stroke-width="1"/>`;});
+ let axes='',labels='';keys.forEach((k,i)=>{const[x,y]=pt(i,R);axes+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#E6E9EF" stroke-width="1"/>`;const[lx,ly]=pt(i,R+20);const an=Math.abs(lx-cx)<6?'middle':(lx>cx?'start':'end');labels+=`<text x="${lx}" y="${ly+4}" font-size="9.5" font-family="Outfit,sans-serif" font-weight="600" fill="#1B2A4A" text-anchor="${an}">${DIMS[k].split(' ')[0]}</text>`;});
+ const data=keys.map((k,i)=>pt(i,R*(prof[k]/100)).join(',')).join(' ');
+ return `<svg class="radar" width="280" height="285" viewBox="0 0 280 285">${grid}${axes}<polygon points="${data}" fill="rgba(232,117,26,.22)" stroke="#E8751A" stroke-width="2"/>${labels}</svg>`;}
+
+function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão');
+ const req=calcTriagem(),tec=calcTecnico(),prof=calcPerfil();
+ const perf=Math.round(Object.values(prof).reduce((a,b)=>a+b,0)/Object.keys(prof).length);
+ const nota=Math.round(0.20*req+0.45*tec.pct+0.35*perf);
+ const aprovado=nota>=VAGA.corte;
+ const cls=aprovado?'pri':nota>=70?'rec':'ana',clsL=aprovado?'Acima do corte — agendar entrevista':nota>=70?'Em análise':'Abaixo do corte';
+ const payload={vaga:VAGA.titulo,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,videos:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
+ enviarCandidatura(payload);
+ const dims=Object.keys(DIMS).map(d=>`<div class="dimrow"><div class="top"><b>${DIMS[d]}</b><span>${prof[d]}%</span></div><div class="bar"><i style="width:${prof[d]}%"></i></div></div>`).join('');
+ app.innerHTML=`<div class="card"><div class="eyebrow">Avaliação concluída</div><h2 class="q-title" style="margin-bottom:6px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
+  <div style="display:flex;align-items:center;gap:16px;margin:8px 0 18px"><div class="scorebig">${nota}</div><div><div class="small" style="margin-bottom:6px">Nota final (0–100)</div><span class="badge ${cls}">${clsL}</span></div></div>
+  <div class="sectile"><span>Triagem / requisitos</span><b>${req}%</b></div>
+  <div class="sectile"><span>Teste técnico e prático</span><b>${tec.got}/${tec.total} · ${tec.pct}%</b></div>
+  <div class="sectile"><span>Aderência de perfil</span><b>${perf}%</b></div>
+  <div class="sectile"><span>Entrevista em vídeo</span><b>${st.videoBlobs.length} resposta(s)</b></div>
+  <h3 style="font-size:15px;color:var(--navy);margin:22px 0 2px">Perfil nas 7 competências do SAC</h3>
+  <p class="small" style="margin-bottom:4px">Sem certo ou errado — mostra as suas tendências.</p>${radarSVG(prof)}${dims}
+  <div class="btn-row" id="cta"></div>
+  <details style="margin-top:18px"><summary class="small" style="cursor:pointer">Ver dados que vão para o RH (n8n)</summary><div class="payload">${JSON.stringify(payload,null,2)}</div></details></div>`;
+ const cta=document.getElementById('cta');
+ if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Agendar minha entrevista';b.onclick=screenAgenda;cta.appendChild(b);}
+ else{cta.innerHTML=`<div class="okbox" style="background:#F1F5F9;border-color:#E2E8F0;color:#475569">Recebemos a sua candidatura. Vamos analisar o seu resultado e, havendo aderência, o RH entra em contato pelo WhatsApp.</div>`;}}
+
+/* ===== AGENDAMENTO (protótipo; trava real via n8n + Google Calendar) ===== */
+function genSlots(){const out=[];const base=new Date();base.setHours(0,0,0,0);let d=new Date(base);let added=0;
+ while(added<8){d.setDate(d.getDate()+1);const wd=d.getDay();if(wd===0||wd===6)continue;['10:00','14:00','16:00'].forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h,date:new Date(d),time:h}));added++;}
+ return out;}
+function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken')||'[]'));}catch(e){return new Set();}}
+function saveTaken(s){try{localStorage.setItem('mdl_slots_taken',JSON.stringify([...s]));}catch(e){}}
+function screenAgenda(){st.screen='agenda';
+ const slots=genSlots(),taken=takenSet();let sel=null;
+ const dias={};slots.forEach(s=>{const k=s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(s);});
+ let html=`<div class="card"><div class="eyebrow">Você passou do corte 🎉</div><h2 class="q-title" style="margin-bottom:8px">Agende sua entrevista com um gestor</h2>
+  <p class="small" style="margin-bottom:6px">Escolha um horário livre. Cada horário recebe <b>uma única entrevista</b> — ao reservar, ele fica indisponível para os demais candidatos.</p>`;
+ Object.entries(dias).forEach(([dia,ss])=>{html+=`<div class="slotday">${dia}</div><div class="slots">`+ss.map(s=>{const t=taken.has(s.id);return `<div class="slot ${t?'taken':''}" data-id="${s.id}">${s.time}</div>`;}).join('')+`</div>`;});
+ html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Confirmar horário</button></div>
+  <p class="small" style="margin-top:12px">Protótipo: a reserva fica gravada neste navegador. Em produção, a trava entre todos os candidatos é feita pelo n8n na agenda real dos gestores (Google Calendar), impossibilitando dois agendamentos no mesmo horário.</p></div>`;
+ app.innerHTML=html;
+ const conf=document.getElementById('conf');
+ [...document.querySelectorAll('.slot:not(.taken)')].forEach(el=>el.onclick=()=>{sel=el.dataset.id;document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');conf.disabled=false;});
+ conf.onclick=()=>{if(!sel)return;const taken=takenSet();if(taken.has(sel)){toast('Esse horário acabou de ser reservado. Escolha outro.');screenAgenda();return;}
+  taken.add(sel);saveTaken(taken);
+  const slot=genSlots().find(s=>s.id===sel);const gestor=['Rodrigo (Gestor da conta)','Emanueli (Pessoas)'][Math.floor(Math.random()*2)];
+  const quando=slot.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+slot.time;
+  app.innerHTML=`<div class="card"><div class="eyebrow">Entrevista agendada ✓</div><h2 class="q-title" style="margin-bottom:14px">Tudo certo, ${st.cand.nome.split(' ')[0]}!</h2>
+   <div class="okbox"><b>Entrevista confirmada</b><br>${quando}<br>Com: ${gestor}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
+   <p class="small" style="margin-top:16px">Você vai receber a confirmação e um lembrete pelo WhatsApp. Em produção, o horário já entra na agenda do gestor e sai da lista para os demais candidatos.</p></div>`;};}
+
+
+/* ===== ENVIO REAL (grava no Sheets via função serverless -> n8n) ===== */
+async function enviarCandidatura(base){
+  const tri={}; TRIAGEM.forEach(t=>{const idx=st.triagem[t.id]; tri[t.id]=(idx!=null&&t.op[idx])?t.op[idx][0]:'';});
+  const body={...base, triagem_texto:tri, videos:st.videoBlobs};
+  try{
+    await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  }catch(e){ /* best-effort: nao bloqueia o candidato */ }
+}
+
+screenIntro();
+</script>
+</body>
+</html>

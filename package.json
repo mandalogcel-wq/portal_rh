@@ -1,0 +1,11 @@
+{
+  "name": "portal-rh-mandalog",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portal de seleção da Mandalog — Assistente de SAC. Frontend estático + função serverless que grava os resultados via n8n no Google Sheets.",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  }
+}
