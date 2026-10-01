@@ -69,10 +69,10 @@ for conta dele (logins/credenciais); o resto execute.
     informar **instance, token e client-token da Z-API** mais o **ID do grupo**; e
     definir os **gestores reais** (nome + e-mail). O sorteio aleatório do gestor foi
     removido.
-  - Grade definida pelo Marcus: **14h às 16h, de 30 em 30 minutos** (14:00, 14:30, 15:00,
-    15:30, 16:00), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
-    `public/index.html` — para mudar janela, passo, número de dias ou incluir sábado,
-    basta alterar ali.
+  - Grade definida pelo Marcus: **10h às 12h e 14h às 16h, de 30 em 30 minutos**
+    (10 horários por dia), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
+    `public/index.html`: `janelas` aceita quantos períodos quiser; `passo`, `duracao`,
+    `dias` e `sabado` ajustam o resto sem mexer na lógica.
   - Com isso ligado: criar o evento no Calendar com candidato e gestor convidados e
     `conferenceData` para o Meet, gravar `meet_link`/`evento_id`/`entrevista_gestor` na
     planilha, ler os horários livres da agenda real (trava entre candidatos) e postar o

@@ -102,7 +102,8 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--danger);color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:50;opacity:0;pointer-events:none;transition:opacity .25s;max-width:90%}
 .toast.show{opacity:1}.hide{display:none !important}.small{font-size:12.5px;color:var(--muted)}
 .radar{display:block;margin:6px auto 2px}
-.slotday{margin:14px 0 4px;font-family:'Outfit';font-weight:700;color:var(--navy);font-size:14px}
+.slotday{margin:18px 0 2px;font-family:'Outfit';font-weight:700;color:var(--navy);font-size:14px}
+.slotper{margin:8px 0 5px;font-size:11.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
 .slots{display:flex;flex-wrap:wrap;gap:9px}
 .slot{border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;font-family:'Outfit';font-weight:600;color:var(--navy);cursor:pointer;background:#fff;font-size:14px;transition:.15s}
 .slot:hover{border-color:var(--orange)}.slot.sel{background:var(--orange);color:#fff;border-color:var(--orange)}
@@ -393,17 +394,19 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
 
 /* ===== AGENDAMENTO (trava real via n8n + Google Calendar) =====
    Entrevistas das 14h às 16h, de 30 em 30 minutos, em dias úteis. */
-const AGENDA={inicio:'14:00',fim:'16:00',passo:30,duracao:30,dias:5,sabado:false};
+const AGENDA={janelas:[{nome:'Manhã',inicio:'10:00',fim:'12:00'},
+                       {nome:'Tarde',inicio:'14:00',fim:'16:00'}],
+              passo:30,duracao:30,dias:5,sabado:false};
 function horariosDoDia(){const out=[];
- const [hi,mi]=AGENDA.inicio.split(':').map(Number),[hf,mf]=AGENDA.fim.split(':').map(Number);
- for(let m=hi*60+mi;m<=hf*60+mf;m+=AGENDA.passo){
-  out.push(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));}
+ AGENDA.janelas.forEach(j=>{const [hi,mi]=j.inicio.split(':').map(Number),[hf,mf]=j.fim.split(':').map(Number);
+  for(let m=hi*60+mi;m<=hf*60+mf;m+=AGENDA.passo){
+   out.push({periodo:j.nome,time:String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')});}});
  return out;}
 function genSlots(){const out=[],horas=horariosDoDia();
  const base=new Date();base.setHours(0,0,0,0);let d=new Date(base);let added=0,guarda=0;
  while(added<AGENDA.dias&&guarda++<60){d.setDate(d.getDate()+1);const wd=d.getDay();
   if(wd===0||(wd===6&&!AGENDA.sabado))continue;
-  horas.forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h,date:new Date(d),time:h}));added++;}
+  horas.forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h.time,date:new Date(d),time:h.time,periodo:h.periodo}));added++;}
  return out;}
 function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken')||'[]'));}catch(e){return new Set();}}
 function saveTaken(s){try{localStorage.setItem('mdl_slots_taken',JSON.stringify([...s]));}catch(e){}}
@@ -412,7 +415,10 @@ function screenAgenda(){st.screen='agenda';
  const dias={};slots.forEach(s=>{const k=s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(s);});
  let html=`<div class="card"><div class="eyebrow">Você passou do corte 🎉</div><h2 class="q-title" style="margin-bottom:8px">Agende sua entrevista com um gestor</h2>
   <p class="small" style="margin-bottom:6px">Escolha um horário livre. Cada horário recebe <b>uma única entrevista</b> — ao reservar, ele fica indisponível para os demais candidatos.</p>`;
- Object.entries(dias).forEach(([dia,ss])=>{html+=`<div class="slotday">${dia}</div><div class="slots">`+ss.map(s=>{const t=taken.has(s.id);return `<div class="slot ${t?'taken':''}" data-id="${s.id}">${s.time}</div>`;}).join('')+`</div>`;});
+ Object.entries(dias).forEach(([dia,ss])=>{html+=`<div class="slotday">${dia}</div>`;
+  const pers={};ss.forEach(s=>{(pers[s.periodo]=pers[s.periodo]||[]).push(s);});
+  Object.entries(pers).forEach(([per,ps])=>{html+=`<div class="slotper">${per}</div><div class="slots">`
+   +ps.map(s=>{const t=taken.has(s.id);return `<div class="slot ${t?'taken':''}" data-id="${s.id}">${s.time}</div>`;}).join('')+`</div>`;});});
  html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Confirmar horário</button></div>
   <p class="small" style="margin-top:12px">Protótipo: a reserva fica gravada neste navegador. Em produção, a trava entre todos os candidatos é feita pelo n8n na agenda real dos gestores (Google Calendar), impossibilitando dois agendamentos no mesmo horário.</p></div>`;
  app.innerHTML=html;
