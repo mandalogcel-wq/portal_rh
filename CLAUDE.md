@@ -77,6 +77,15 @@ for conta dele (logins/credenciais); o resto execute.
     `conferenceData` para o Meet, gravar `meet_link`/`evento_id`/`entrevista_gestor` na
     planilha, ler os horários livres da agenda real (trava entre candidatos) e postar o
     convite no grupo via Z-API.
+- **Trava de recandidatura** ✅ FEITO: antes de iniciar a avaliação o portal chama
+  `tipo=verificar`, que busca o e-mail **ou** o WhatsApp na planilha e responde
+  `ja_participou`. Há também uma marca em `localStorage` que pega o caso comum
+  (recarregar a página). Se a verificação falhar ou demorar mais de 6s, o candidato
+  passa — é melhor deixar entrar um duplicado do que barrar alguém legítimo por falha
+  de rede; o duplicado aparece na planilha e o RH resolve.
+- **Questões técnicas:** reescritas com distratores plausíveis — o erro está na ordem,
+  no prazo ou no sistema usado, não em alternativas absurdas. As alternativas são
+  embaralhadas uma vez por candidato, então a posição da correta muda entre pessoas.
 - **Tráfego:** republicar a vaga / anúncios apontando para a URL do portal.
 
 ## Decisões a confirmar com o Marcus

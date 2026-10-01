@@ -144,37 +144,37 @@ const SECOES=[
   {id:"tecnico",nome:"Teste Técnico e Prático",eyebrow:"Conhecimento e procedimento do SAC (há resposta correta)",tempo:55,tipo:"mcq",
    questoes:[
     {q:"Um veículo está parado há 70 minutos no cliente, sem atualização no app. Sua primeira ação é:",op:[
-      {t:"Esperar completar 2 horas antes de agir"},
-      {t:"Contatar o motorista na hora, entender a causa e avisar o cliente se afetar a janela",correta:true},
-      {t:"Abrir a ocorrência só no fechamento do dia"},
-      {t:"Aguardar o cliente reclamar primeiro"}]},
+      {t:"Abrir a ocorrência no sistema e acompanhar até o motorista atualizar o status pelo app"},
+      {t:"Falar com o motorista agora, entender a causa e avisar o cliente se a janela for afetada",correta:true},
+      {t:"Avisar o cliente do atraso, abrir a ocorrência e depois apurar a causa com o motorista"},
+      {t:"Acionar o gestor da conta para que ele verifique a situação com o motorista"}]},
     {q:"O motorista precisa fazer uma descarga em rota. O procedimento correto é:",op:[
-      {t:"Deixar o motorista pagar e resolver depois"},
-      {t:"Solicitar a autorização ao cliente ANTES do pagamento, orientar o motorista e lançar o comprovante no ESL",correta:true},
-      {t:"Autorizar por telefone, sem registrar"},
-      {t:"Mandar direto para a prestação de contas no fim do mês"}]},
+      {t:"Orientar o motorista a pagar, guardar o comprovante e confirmar com o cliente no mesmo dia"},
+      {t:"Pedir a autorização ao gestor da conta e lançar o valor na prestação de contas da rota"},
+      {t:"Obter a autorização do cliente antes do pagamento, orientar o motorista e lançar o comprovante no ESL",correta:true},
+      {t:"Registrar a necessidade no GreenMile e seguir a orientação que o motorista receber no local"}]},
     {q:"Uma reentrega foi acordada com o cliente. Para a operação poder cobrá-la, você precisa:",op:[
-      {t:"Apenas anotar num caderno de controle"},
       {t:"Registrar a senha de reentrega no ESL e no GreenMile, vinculada à nota fiscal",correta:true},
-      {t:"Avisar o motorista verbalmente"},
-      {t:"Nada — a cobrança é automática pelo sistema"}]},
+      {t:"Abrir a ocorrência de reentrega no GreenMile com a data acordada e o motivo da primeira tentativa"},
+      {t:"Lançar a reentrega no ESL e anexar o canhoto da tentativa que foi frustrada"},
+      {t:"Encaminhar o e-mail do cliente autorizando a reentrega para a prestação de contas"}]},
     {q:"Chega um alerta do gerenciamento de risco (desvio de rota). O correto é:",op:[
-      {t:"Tratar em até 5 minutos com a central da gerenciadora e acionar o gestor em caso de desvio ou sinistro",correta:true},
-      {t:"Esperar o motorista ligar explicando"},
-      {t:"Registrar e tratar no dia seguinte"},
-      {t:"Ignorar se o veículo voltar sozinho à rota"}]},
-    {q:"Uma entrega foi frustrada (ponto de venda fechado). O que não pode faltar?",op:[
-      {t:"Reagendar a entrega sem registrar nada"},
-      {t:"Registrar a causa da frustração na ocorrência",correta:true},
-      {t:"Apenas avisar o motorista para seguir"},
-      {t:"Deixar para resolver no fechamento do mês"}]},
+      {t:"Ligar para o motorista e confirmar se está tudo bem antes de acionar a gerenciadora"},
+      {t:"Registrar o alerta e acompanhar pelo rastreador até o veículo voltar à rota prevista"},
+      {t:"Acionar o gestor da conta e aguardar a orientação dele para falar com a gerenciadora"},
+      {t:"Tratar em até 5 minutos com a central da gerenciadora e acionar o gestor se houver desvio ou sinistro",correta:true}]},
+    {q:"Entrega frustrada: o ponto de venda estava fechado. Além de reagendar, o que não pode faltar?",op:[
+      {t:"Confirmar o novo horário com o cliente e registrar o reagendamento no GreenMile"},
+      {t:"Registrar a causa da frustração na ocorrência, com o horário da tentativa e a evidência do motorista",correta:true},
+      {t:"Informar a frustração ao gestor da conta no relatório de fechamento do dia"},
+      {t:"Pedir ao motorista que tente de novo no fim da rota antes de registrar a frustração"}]},
     {q:"Pela regra da operação, o prazo máximo para responder uma mensagem de motorista ou cliente é:",op:[
-      {t:"1 hora"},{t:"15 minutos",correta:true},{t:"Até o fim do turno"},{t:"Não há prazo definido"}]},
+      {t:"15 minutos",correta:true},{t:"30 minutos"},{t:"1 hora"},{t:"Até o fim do turno"}]},
     {q:"Ao terminar o seu turno, antes de sair, você precisa:",op:[
-      {t:"Apenas desligar o computador"},
+      {t:"Atualizar o status de todas as entregas no GreenMile e registrar as ocorrências abertas"},
+      {t:"Deixar as pendências registradas no ESL para quem assumir o turno consultar"},
       {t:"Passar por escrito as entregas ainda em rota e as pendências ao próximo responsável",correta:true},
-      {t:"Avisar o colega verbalmente o que ficou pendente"},
-      {t:"Deixar as pendências registradas para o dia seguinte"}]}
+      {t:"Avisar o gestor da conta do que ficou pendente e retomar no início do próximo turno"}]}
    ]},
   {id:"comportamento",nome:"Comportamento",eyebrow:"O quanto combina com você (não há resposta certa)",tempo:30,tipo:"likert",
    questoes:[
@@ -270,9 +270,38 @@ function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
   if(!cidade||!bairro){toast('Informe a cidade e o bairro onde você mora.');return;}
   if(!ind){toast('Diga se você foi indicado por alguém da Mandalog.');return;}
   if(ind==='sim'&&!indnome){toast('Informe o nome de quem indicou você.');return;}
-  st.cand={nome,telefone:formataFone(dig),email,cidade,bairro,
+  const cand={nome,telefone:formataFone(dig),email,cidade,bairro,
    indicado:ind==='sim'?'Sim':'Não',indicado_por:ind==='sim'?indnome:''};
-  screenTriagem();};}
+  const btn=document.getElementById('go');btn.disabled=true;btn.textContent='Verificando...';
+  verificaDuplicado(cand).then(r=>{
+   if(r&&r.ja_participou){telaJaParticipou(r);return;}
+   st.cand=cand;marcaParticipacao(cand);screenTriagem();
+  }).catch(()=>{st.cand=cand;marcaParticipacao(cand);screenTriagem();});};}
+
+/* ===== TRAVA DE RECANDIDATURA ===== */
+const CHAVE_PART='mdl_rh_participou';
+function participacaoLocal(){try{return JSON.parse(localStorage.getItem(CHAVE_PART)||'null');}catch(e){return null;}}
+function marcaParticipacao(c){try{localStorage.setItem(CHAVE_PART,JSON.stringify({email:c.email,nome:c.nome,data:new Date().toISOString()}));}catch(e){}}
+async function verificaDuplicado(c){
+ const local=participacaoLocal();
+ if(local&&local.email&&local.email.toLowerCase()===c.email.toLowerCase())return{ja_participou:true,...local};
+ const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),6000);
+ try{
+  const r=await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
+   signal:ctrl.signal,body:JSON.stringify({tipo:'verificar',email:c.email,telefone:c.telefone})});
+  return await r.json();
+ }finally{clearTimeout(t);}
+}
+function telaJaParticipou(r){st.screen='duplicado';setProgress(0,'');
+ const quando=r.data?(' em '+new Date(r.data).toLocaleDateString('pt-BR')):'';
+ app.innerHTML=`<div class="card"><div class="eyebrow">Candidatura já registrada</div>
+  <h2 class="q-title" style="margin-bottom:10px">Você já participou desta seleção</h2>
+  <p class="lead">Encontramos uma candidatura sua${quando} para esta vaga. Cada pessoa participa
+   <b>uma única vez</b> — a avaliação é cronometrada e refazer daria vantagem sobre os demais candidatos.</p>
+  ${r.entrevista_em?`<div class="okbox"><b>Horário que você escolheu</b><br>${r.entrevista_em}</div>`:''}
+  <p class="small" style="margin-top:14px">Se você acha que houve um engano, ou quer atualizar algum dado,
+   fale com o RH — a gente resolve por lá.</p>
+  ${blocoAjuda()}</div>`;}
 
 /* ===== TRIAGEM ===== */
 function screenTriagem(){st.screen='triagem';setProgress(1,'Triagem');
@@ -454,6 +483,13 @@ async function enviarCandidatura(base){
     await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   }catch(e){ /* best-effort: nao bloqueia o candidato */ }
 }
+
+/* Embaralha as alternativas do teste técnico uma vez por candidato, para a posição
+   da resposta certa não virar padrão entre quem faz a prova. */
+(function embaralhaTecnico(){
+ const sec=SECOES.find(s=>s.tipo==='mcq');if(!sec)return;
+ sec.questoes.forEach(q=>{for(let i=q.op.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[q.op[i],q.op[j]]=[q.op[j],q.op[i]];}});
+})();
 
 screenIntro();
 </script>

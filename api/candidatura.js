@@ -25,6 +25,14 @@ export default async function handler(req, res) {
       body: JSON.stringify(payload),
     });
 
+    // A verificação de candidatura duplicada precisa da resposta do n8n de volta
+    // no navegador; os outros tipos só precisam saber que chegou.
+    if (payload.tipo === 'verificar') {
+      let dados = {};
+      try { dados = await r.json(); } catch (e) { dados = {}; }
+      return res.status(200).json({ ok: true, ...dados });
+    }
+
     return res.status(200).json({ ok: true, n8n_status: r.status });
   } catch (err) {
     // Não derruba o candidato: loga e responde erro suave.
