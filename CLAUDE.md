@@ -58,37 +58,27 @@ for conta dele (logins/credenciais); o resto execute.
   ~300KB por resposta de 75s), o n8n sobe na pasta "Mandalog — Áudios Candidatos RH"
   (`18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc`) e grava o link em `link_audios`. Folga grande
   no limite de 4,5MB da função; se um dia voltar a ser vídeo, aí sim precisa de Vercel Blob.
-- **Agenda de entrevistas — PARCIAL.** Decidido: **Google Calendar + Meet** e **Z-API**
-  para o aviso no grupo de WhatsApp.
-  - Já feito: o portal envia o horário escolhido (`tipo=agendamento`, mesmo endpoint
-    `/api/candidatura`); um IF no início do workflow separa os dois tipos de envio e o
-    agendamento atualiza a linha do candidato pelo e-mail, gravando `entrevista_em`.
-    A tela final não promete mais entrevista confirmada — diz que o RH confirma pelo
-    WhatsApp.
-  - Falta (depende do Marcus): conectar a credencial do **Google Calendar** no n8n e
-    informar **instance, token e client-token da Z-API** mais o **ID do grupo**; e
-    informar as chaves da Z-API. O gestor já está definido: **Rodrigo Freitas —
-    rodrigo.freitas@mandalog.com.br** (const `GESTOR` no `public/index.html`). Gestor
-    único, então não há rodízio; o sorteio aleatório que existia foi removido.
-  - **Aviso no grupo do WhatsApp ✅ FEITO.** Instância Z-API `3F433452...` (Supley),
-    credencial do Client-Token no n8n: **"Header Auth account"** (`UitEFSpGVNbn30ZQ`),
-    header `Client-Token`. Grupo: **Reestruturação 3C - GRU**
-    (`120363430026918823-group`). O número da instância (11988957042) já é membro.
-    Nada precisa ser configurado nos webhooks da Z-API — só enviamos, não recebemos.
-    Testado: `200 OK`, mensagem entregue no grupo.
-  - **Z-API:** o Marcus optou por reaproveitar a instância **"Supley"**, que está
-    conectada e ociosa. Consequência aceita por ele: as mensagens do RH saem pelo número
-    do Supley, e um eventual bloqueio da Meta por uso de API não oficial atinge os dois
-    negócios. Se um dia for preciso separar, basta criar outra instância com um chip do
-    RH e trocar a credencial no n8n — o workflow não muda.
-  - Grade definida pelo Marcus: **10h às 12h e 14h às 16h, de 30 em 30 minutos**
-    (10 horários por dia), 5 dias úteis à frente. Parametrizada na const `AGENDA` do
-    `public/index.html`: `janelas` aceita quantos períodos quiser; `passo`, `duracao`,
-    `dias` e `sabado` ajustam o resto sem mexer na lógica.
-  - Com isso ligado: criar o evento no Calendar com candidato e gestor convidados e
-    `conferenceData` para o Meet, gravar `meet_link`/`evento_id`/`entrevista_gestor` na
-    planilha, ler os horários livres da agenda real (trava entre candidatos) e postar o
-    convite no grupo via Z-API.
+- **Agenda de entrevistas — ESCOPO FECHADO (sem Google Calendar).** O Marcus decidiu
+  não usar o Google Calendar: o aviso no grupo do WhatsApp basta. O que está no ar:
+  - O portal envia o horário escolhido (`tipo=agendamento`, mesmo endpoint
+    `/api/candidatura`, com nota, gestor, cidade e bairro). Um IF no início do workflow
+    separa os três tipos de envio (verificar / agendamento / candidatura).
+  - O horário vai para a coluna `entrevista_em` da linha do candidato.
+  - O n8n posta no grupo **Reestruturação 3C - GRU** (`120363430026918823-group`) via
+    **Z-API**, instância "Supley" (`3F433452...`), Client-Token na credencial
+    **"Header Auth account"** (`UitEFSpGVNbn30ZQ`), header `Client-Token`. O número da
+    instância (11988957042) é membro do grupo. Nada a configurar nos webhooks da Z-API
+    — só enviamos, não recebemos.
+  - A tela final não promete entrevista confirmada: diz que o RH confirma pelo WhatsApp.
+  - Gestor: **Rodrigo Freitas — rodrigo.freitas@mandalog.com.br** (const `GESTOR`).
+  - Grade: **10h–12h e 14h–16h, de 30 em 30 min**, 5 dias úteis à frente (const `AGENDA`
+    no `public/index.html`; `janelas` aceita quantos períodos quiser).
+  - **Consequência aceita:** sem Calendar não há trava real entre candidatos. Dois
+    candidatos podem escolher o mesmo horário — os dois caem no grupo e o RH desempata
+    na mão. As colunas `entrevista_gestor`, `meet_link` e `evento_id` existem na planilha
+    e ficam vazias. Se um dia isso incomodar, dá para travar lendo os `entrevista_em` já
+    ocupados na planilha, sem precisar de Calendar.
+
 - **Trava de recandidatura** ✅ FEITO: antes de iniciar a avaliação o portal chama
   `tipo=verificar`, que busca o e-mail **ou** o WhatsApp na planilha e responde
   `ja_participou`. Há também uma marca em `localStorage` que pega o caso comum
