@@ -55,10 +55,23 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 .stepitem .d{font-size:14.5px}.stepitem .d b{display:block;font-family:'Outfit';color:var(--navy);font-weight:600}
 .rules{background:#FFF7EF;border:1px solid #FCD9B6;border-radius:12px;padding:15px 16px;font-size:13.5px;color:#7a4a17;margin:18px 0}
 .rules b{color:#8a4a10}.rules ul{margin:8px 0 0;padding-left:18px}.rules li{margin:4px 0}
-.videobox{background:#0d1526;border-radius:14px;overflow:hidden;position:relative;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center}
-.videobox video{width:100%;height:100%;object-fit:cover}.videobox .ph{color:#8896b3;font-size:14px;text-align:center;padding:20px}
+.audiobox{background:#0d1526;border-radius:14px;position:relative;padding:26px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;min-height:190px}
+.audiobox .ph{color:#8896b3;font-size:14px;text-align:center}
+.mic{width:66px;height:66px;border-radius:50%;background:#1b2a4a;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background .2s}
+.mic.on{background:var(--orange)}.mic svg{width:30px;height:30px;fill:#fff}
+.level{width:100%;max-width:260px;height:8px;border-radius:99px;background:#1b2a4a;overflow:hidden}
+.level>i{display:block;height:100%;width:0;background:var(--orange);border-radius:99px;transition:width .1s linear}
+.audiobox audio{width:100%;max-width:320px}
 .rec-dot{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:7px;background:rgba(0,0,0,.5);color:#fff;padding:5px 11px;border-radius:99px;font-size:12px;font-weight:600}
 .rec-dot i{width:9px;height:9px;border-radius:50%;background:#ff4d4d;animation:blink 1s infinite}@keyframes blink{50%{opacity:.25}}
+.ajuda{display:flex;gap:16px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:15px 16px;margin-top:18px}
+.ajuda .txt{flex:1 1 auto;font-size:13.5px;color:var(--muted)}
+.ajuda .txt b{display:block;font-family:'Outfit';font-weight:600;color:var(--navy);font-size:14.5px;margin-bottom:3px}
+.ajuda .qr{flex:0 0 auto;width:96px;height:96px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.ajuda .qr img{display:block;width:100%;height:100%}
+.zap{display:inline-flex;align-items:center;gap:7px;margin-top:9px;font-family:'Outfit';font-weight:600;font-size:13.5px;color:#fff;background:#25D366;padding:8px 14px;border-radius:10px;text-decoration:none}
+.zap svg{width:16px;height:16px;fill:#fff}
+@media(max-width:560px){.ajuda .qr{display:none}}
 .scorebig{font-family:'Outfit';font-weight:800;font-size:46px;color:var(--navy);line-height:1}
 .badge{display:inline-block;font-family:'Outfit';font-weight:700;font-size:13px;padding:7px 14px;border-radius:99px}
 .badge.pri{background:#DCFCE7;color:#166534}.badge.rec{background:#FEF3C7;color:#92400E}.badge.ana{background:#E2E8F0;color:#475569}
@@ -86,8 +99,7 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 <script>
 /* ===== VAGA ===== */
 const VAGA={titulo:"Assistente de SAC — Monitoramento de Entregas",local:"Bonsucesso, Guarulhos/SP · 2 vagas",
-  webhook:"https://mandalog.app.n8n.cloud/webhook/nova_candidatura_wk_qMc4XllfRgWEhjrb",
-  corte:85};
+  jornada:"Segunda a sábado",corte:85};
 /* 7 competências da descrição do cargo */
 const DIMS={COM:"Comunicação clara",URG:"Senso de urgência",CONF:"Gestão de conflitos",PRO:"Proatividade",COB:"Cobrança e influência",RES:"Resiliência",REG:"Capricho no registro"};
 
@@ -100,7 +112,9 @@ const TRIAGEM=[
   {id:"esl",label:"Você já trabalhou com o ESL?",op:[["Sim",2],["Não",0]]},
   {id:"bairro",label:"Em qual região você mora?",
     op:[["Bonsucesso, Pimentas, Pres. Dutra ou arredores",2],["Outro bairro de Guarulhos",1],["Outra cidade",0]]},
-  {id:"horario",label:"Qual horário você prefere? (sexta, 1h mais cedo)",score:false,
+  {id:"sabado",label:"A jornada é de segunda a sábado. Você tem disponibilidade para trabalhar aos sábados?",score:false,
+    op:[["Sim, sem problema",0],["Sim, mas só alguns sábados",0],["Não tenho disponibilidade",0]]},
+  {id:"horario",label:"Qual horário você prefere? (sábado, meio período)",score:false,
     op:[["07h às 17h",0],["09h às 19h",0],["Tanto faz",0]]}
 ];
 const TRIAGEM_MAX=TRIAGEM.filter(t=>t.score!==false).reduce((a,t)=>a+Math.max(...t.op.map(o=>o[1])),0);
@@ -160,7 +174,7 @@ const SECOES=[
     {a:{t:"Comunico de forma clara e sem ruído.",dim:"COM"},b:{t:"Trato primeiro o que trava a entrega.",dim:"URG"}}
    ]}
 ];
-const VIDEO={nome:"Entrevista em Vídeo",eyebrow:"Entrevista gravada",tempo:75,
+const VIDEO={nome:"Entrevista em Áudio",eyebrow:"Resposta gravada em áudio",tempo:75,
   questoes:["Conte uma situação real em que um cliente ou motorista estava irritado e você resolveu. O que você fez e falou, na prática?",
             "Num dia de pico, com várias ocorrências ao mesmo tempo, como você se organiza para não deixar nada sem resposta?"]};
 
@@ -179,22 +193,32 @@ function formataFone(s){const d=soDigitos(s);if(d.length<=2)return d?'('+d:'';co
  return d.length<=corte?'('+d.slice(0,2)+') '+d.slice(2):'('+d.slice(0,2)+') '+d.slice(2,corte)+'-'+d.slice(corte);}
 function emailValido(s){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);}
 
+/* ===== CONTATO DO RH ===== */
+const RH={zap:"5511947495997",exibe:"(11) 94749-5997",
+ msg:"Olá! Estou com dúvida ou dificuldade para preencher o portal do RH da vaga de Assistente de SAC."};
+const RH_URL=`https://wa.me/${RH.zap}?text=${encodeURIComponent(RH.msg)}`;
+const ZAP_SVG='<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9 1-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.3.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.6 0 1.2Z"/></svg>';
+function blocoAjuda(){return `<div class="ajuda">
+ <div class="txt"><b>Dúvida ou dificuldade para preencher?</b>Fale com o RH da Mandalog no WhatsApp ${RH.exibe}.
+  <a class="zap" href="${RH_URL}" target="_blank" rel="noopener">${ZAP_SVG}Chamar o RH no WhatsApp</a></div>
+ <div class="qr"><img src="/qr-rh-whatsapp.svg" alt="QR code do WhatsApp do RH da Mandalog" width="96" height="96" loading="lazy"></div></div>`;}
+
 /* ===== INTRO ===== */
 function screenIntro(){st.screen='intro';setProgress(0,'');
- app.innerHTML=`<div class="card hero"><span class="role">${VAGA.titulo} · ${VAGA.local}</span>
+ app.innerHTML=`<div class="card hero"><span class="role">${VAGA.titulo} · ${VAGA.local} · ${VAGA.jornada}</span>
   <h1>Processo seletivo Mandalog</h1>
   <p class="lead">Você vai acompanhar entregas em rota, tratar ocorrências e manter cliente e motoristas informados. Esta avaliação é rápida e cronometrada. Só a parte técnica tem resposta certa — o resto mostra o seu jeito de trabalhar.</p>
   <div class="steps">
    <div class="stepitem"><div class="n">1</div><div class="d"><b>Triagem</b>Experiência e perfil para a vaga</div></div>
    <div class="stepitem"><div class="n">2</div><div class="d"><b>Teste técnico e prático</b>Situações reais do SAC</div></div>
    <div class="stepitem"><div class="n">3</div><div class="d"><b>Comportamento e valores</b>Como você age no dia a dia</div></div>
-   <div class="stepitem"><div class="n">4</div><div class="d"><b>Entrevista em vídeo</b>Você responde em vídeo, na hora</div></div></div>
+   <div class="stepitem"><div class="n">4</div><div class="d"><b>Entrevista em áudio</b>Você grava a resposta pelo microfone, na hora</div></div></div>
   <div class="rules"><b>Como funciona:</b><ul>
    <li>Cada pergunta do teste tem <b>tempo limite</b>. Se o tempo acabar, avança sozinho.</li>
    <li>Não dá para voltar para uma pergunta anterior.</li>
    <li>No perfil não existe resposta certa — seja você mesmo.</li>
    <li>Quem tiver o melhor resultado já agenda a entrevista com um gestor ao final.</li></ul></div>
-  <div class="btn-row"><button class="btn btn-primary" id="go">Começar</button></div></div>`;
+  <div class="btn-row"><button class="btn btn-primary" id="go">Começar</button></div>${blocoAjuda()}</div>`;
  document.getElementById('go').onclick=screenDados;}
 
 function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
@@ -202,7 +226,7 @@ function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
   <label class="f">Nome completo</label><input class="f" id="nome" autocomplete="name">
   <label class="f">WhatsApp (com DDD)</label><input class="f" id="fone" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="(11) 90000-0000">
   <label class="f">E-mail</label><input class="f" id="email" inputmode="email" autocomplete="email">
-  <div class="btn-row"><button class="btn btn-primary" id="go">Continuar</button></div></div>`;
+  <div class="btn-row"><button class="btn btn-primary" id="go">Continuar</button></div>${blocoAjuda()}</div>`;
  const fe=document.getElementById('fone');
  fe.oninput=()=>{fe.value=formataFone(fe.value);};
  document.getElementById('go').onclick=()=>{const nome=val('nome'),fone=val('fone'),email=val('email');
@@ -245,20 +269,51 @@ function startTimer(secs,onEnd){st.timeLeft=secs;const box=document.getElementBy
  const tick=()=>{num.textContent=st.timeLeft;lbl.textContent=st.timeLeft+'s restantes';fg.style.strokeDashoffset=C*(1-st.timeLeft/secs);box.classList.toggle('warn',st.timeLeft<=Math.ceil(secs*.4)&&st.timeLeft>8);box.classList.toggle('crit',st.timeLeft<=8);if(st.timeLeft<=0){clearInterval(st.timer);toast('Tempo esgotado — avançando.');onEnd();return;}st.timeLeft--;};
  tick();st.timer=setInterval(tick,1000);}
 
-/* ===== VÍDEO ===== */
-let mediaStream=null,recorder=null,chunks=[];
+/* ===== ÁUDIO ===== */
+let mediaStream=null,recorder=null,chunks=[],audioCtx=null,levelRaf=null;
+const MIC_SVG='<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M18 11a1 1 0 1 0-2 0 4 4 0 0 1-8 0 1 1 0 1 0-2 0 6 6 0 0 0 5 5.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-2.1a6 6 0 0 0 5-5.9Z"/></svg>';
+function escolheMime(){const c=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+ for(const m of c){if(window.MediaRecorder&&MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(m))return m;}return '';}
+function extDoMime(m){if(!m)return 'webm';if(m.indexOf('mp4')>=0)return 'm4a';if(m.indexOf('ogg')>=0)return 'ogg';return 'webm';}
+
 function runVideo(){st.screen='video';const passo=2+totalItens+st.videoIdx+1;setProgress(passo,VIDEO.nome);const p=VIDEO.questoes[st.videoIdx];
  app.innerHTML=`<div class="card"><div class="eyebrow">${VIDEO.eyebrow} — ${st.videoIdx+1} de ${VIDEO.questoes.length}</div><h2 class="q-title" style="margin-bottom:16px">${p}</h2>
-  <div class="videobox" id="vbox"><video id="preview" autoplay muted playsinline class="hide"></video><div class="ph" id="vph">Clique em <b>Ativar câmera</b> para gravar.<br><span class="small">Você terá ${VIDEO.tempo}s. Encerra sozinho.</span></div><div class="rec-dot hide" id="recdot"><i></i><span id="rectime">${VIDEO.tempo}s</span></div></div>
-  <div class="btn-row"><button class="btn btn-ghost" id="cam">Ativar câmera</button></div><div id="ctrls" class="hide" style="margin-top:11px"><button class="btn btn-primary" id="rec">Gravar resposta</button></div><p class="small" id="vhint" style="margin-top:12px"></p></div>`;
+  <div class="audiobox" id="vbox"><div class="mic" id="micicon">${MIC_SVG}</div>
+   <div class="ph" id="vph">Clique em <b>Ativar microfone</b> para gravar.<br><span class="small">Você terá ${VIDEO.tempo}s. Encerra sozinho.</span></div>
+   <div class="level hide" id="lvl"><i id="lvlbar"></i></div>
+   <div class="rec-dot hide" id="recdot"><i></i><span id="rectime">${VIDEO.tempo}s</span></div></div>
+  <div class="btn-row"><button class="btn btn-ghost" id="cam">Ativar microfone</button></div><div id="ctrls" class="hide" style="margin-top:11px"><button class="btn btn-primary" id="rec">Gravar resposta</button></div><p class="small" id="vhint" style="margin-top:12px"></p></div>`;
  document.getElementById('cam').onclick=enableCam;}
-async function enableCam(){try{mediaStream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});const v=document.getElementById('preview');v.srcObject=mediaStream;v.classList.remove('hide');document.getElementById('vph').classList.add('hide');document.getElementById('cam').classList.add('hide');document.getElementById('ctrls').classList.remove('hide');document.getElementById('rec').onclick=startRec;}
- catch(e){document.getElementById('vhint').innerHTML='Câmera indisponível neste ambiente de teste. Na versão publicada (Vercel) a gravação funciona normalmente.';const b=document.getElementById('cam');b.textContent='Simular gravação e continuar';b.onclick=()=>{st.videoBlobs.push({simulado:true,pergunta:st.videoIdx});nextVideo();};}}
-function startRec(){chunks=[];try{recorder=new MediaRecorder(mediaStream);}catch(e){toast('Gravação não suportada aqui.');return;}
- recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};recorder.onstop=()=>{const blob=new Blob(chunks,{type:'video/webm'});const rd=new FileReader();rd.onloadend=()=>{st.videoBlobs.push({pergunta:st.videoIdx,size:blob.size,dataUrl:rd.result});stopStream();nextVideo();};rd.readAsDataURL(blob);};
- recorder.start();document.getElementById('recdot').classList.remove('hide');const rb=document.getElementById('rec');rb.textContent='Encerrar agora';rb.onclick=()=>{if(recorder.state==='recording')recorder.stop();};
- let t=VIDEO.tempo;const rt=document.getElementById('rectime');const iv=setInterval(()=>{t--;rt.textContent=t+'s';if(t<=0){clearInterval(iv);if(recorder.state==='recording')recorder.stop();}},1000);}
-function stopStream(){if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}}
+
+async function enableCam(){try{mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+  document.getElementById('vph').innerHTML='Microfone ligado. Fale para testar — a barra abaixo tem que se mexer.<br><span class="small">Você terá '+VIDEO.tempo+'s. Encerra sozinho.</span>';
+  document.getElementById('lvl').classList.remove('hide');document.getElementById('micicon').classList.add('on');
+  medirNivel();document.getElementById('cam').classList.add('hide');
+  document.getElementById('ctrls').classList.remove('hide');document.getElementById('rec').onclick=startRec;}
+ catch(e){document.getElementById('vhint').innerHTML='Microfone indisponível ou sem permissão. Libere o microfone no navegador e recarregue, ou siga sem gravar.';
+  const b=document.getElementById('cam');b.textContent='Seguir sem gravar';b.onclick=()=>{st.videoBlobs.push({simulado:true,pergunta:st.videoIdx});nextVideo();};}}
+
+function medirNivel(){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  const src=audioCtx.createMediaStreamSource(mediaStream),an=audioCtx.createAnalyser();an.fftSize=512;
+  src.connect(an);const buf=new Uint8Array(an.fftSize);const bar=document.getElementById('lvlbar');
+  const loop=()=>{an.getByteTimeDomainData(buf);let pico=0;
+   for(let i=0;i<buf.length;i++){const d=Math.abs(buf[i]-128);if(d>pico)pico=d;}
+   if(bar)bar.style.width=Math.min(100,Math.round(pico/128*100*2.2))+'%';levelRaf=requestAnimationFrame(loop);};loop();}catch(e){}}
+
+function pararNivel(){if(levelRaf)cancelAnimationFrame(levelRaf);levelRaf=null;
+ if(audioCtx){try{audioCtx.close();}catch(e){}audioCtx=null;}}
+
+function startRec(){chunks=[];const mime=escolheMime();
+ try{recorder=mime?new MediaRecorder(mediaStream,{mimeType:mime,audioBitsPerSecond:32000}):new MediaRecorder(mediaStream);}
+ catch(e){try{recorder=new MediaRecorder(mediaStream);}catch(e2){toast('Gravação não suportada neste navegador.');return;}}
+ recorder.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+ recorder.onstop=()=>{const tipo=recorder.mimeType||mime||'audio/webm';const blob=new Blob(chunks,{type:tipo});
+  const rd=new FileReader();rd.onloadend=()=>{st.videoBlobs.push({pergunta:st.videoIdx,size:blob.size,mime:tipo,ext:extDoMime(tipo),dataUrl:rd.result});stopStream();nextVideo();};rd.readAsDataURL(blob);};
+ recorder.start();document.getElementById('recdot').classList.remove('hide');
+ const rb=document.getElementById('rec');rb.textContent='Encerrar agora';rb.onclick=()=>{if(recorder.state==='recording')recorder.stop();};
+ let t=VIDEO.tempo;const rt=document.getElementById('rectime');const iv=setInterval(()=>{t--;if(rt)rt.textContent=t+'s';if(t<=0){clearInterval(iv);if(recorder.state==='recording')recorder.stop();}},1000);}
+
+function stopStream(){pararNivel();if(mediaStream){mediaStream.getTracks().forEach(t=>t.stop());mediaStream=null;}}
 function nextVideo(){if(st.videoIdx<VIDEO.questoes.length-1){st.videoIdx++;runVideo();}else screenResultado();}
 
 /* ===== SCORING ===== */
@@ -282,7 +337,7 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
  const nota=Math.round(0.20*req+0.45*tec.pct+0.35*perf);
  const aprovado=nota>=VAGA.corte;
  const cls=aprovado?'pri':nota>=70?'rec':'ana',clsL=aprovado?'Acima do corte — agendar entrevista':nota>=70?'Em análise':'Abaixo do corte';
- const payload={vaga:VAGA.titulo,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,videos:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
+ const payload={vaga:VAGA.titulo,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,audios:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
  enviarCandidatura(payload);
  const dims=Object.keys(DIMS).map(d=>`<div class="dimrow"><div class="top"><b>${DIMS[d]}</b><span>${prof[d]}%</span></div><div class="bar"><i style="width:${prof[d]}%"></i></div></div>`).join('');
  app.innerHTML=`<div class="card"><div class="eyebrow">Avaliação concluída</div><h2 class="q-title" style="margin-bottom:6px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
@@ -290,11 +345,11 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
   <div class="sectile"><span>Triagem / requisitos</span><b>${req}%</b></div>
   <div class="sectile"><span>Teste técnico e prático</span><b>${tec.got}/${tec.total} · ${tec.pct}%</b></div>
   <div class="sectile"><span>Aderência de perfil</span><b>${perf}%</b></div>
-  <div class="sectile"><span>Entrevista em vídeo</span><b>${st.videoBlobs.length} resposta(s)</b></div>
+  <div class="sectile"><span>Entrevista em áudio</span><b>${st.videoBlobs.length} resposta(s)</b></div>
   <h3 style="font-size:15px;color:var(--navy);margin:22px 0 2px">Perfil nas 7 competências do SAC</h3>
   <p class="small" style="margin-bottom:4px">Sem certo ou errado — mostra as suas tendências.</p>${radarSVG(prof)}${dims}
   <div class="btn-row" id="cta"></div>
-  <details style="margin-top:18px"><summary class="small" style="cursor:pointer">Ver dados que vão para o RH (n8n)</summary><div class="payload">${JSON.stringify(payload,null,2)}</div></details></div>`;
+  <details style="margin-top:18px"><summary class="small" style="cursor:pointer">Ver dados que vão para o RH (n8n)</summary><div class="payload">${JSON.stringify(payload,null,2)}</div></details>${blocoAjuda()}</div>`;
  const cta=document.getElementById('cta');
  if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Agendar minha entrevista';b.onclick=screenAgenda;cta.appendChild(b);}
  else{cta.innerHTML=`<div class="okbox" style="background:#F1F5F9;border-color:#E2E8F0;color:#475569">Recebemos a sua candidatura. Vamos analisar o seu resultado e, havendo aderência, o RH entra em contato pelo WhatsApp.</div>`;}}
@@ -328,7 +383,7 @@ function screenAgenda(){st.screen='agenda';
 /* ===== ENVIO REAL (grava no Sheets via função serverless -> n8n) ===== */
 async function enviarCandidatura(base){
   const tri={}; TRIAGEM.forEach(t=>{const idx=st.triagem[t.id]; tri[t.id]=(idx!=null&&t.op[idx])?t.op[idx][0]:'';});
-  const body={...base, triagem_texto:tri, videos:st.videoBlobs};
+  const body={...base, triagem_texto:tri, audios:st.videoBlobs};
   try{
     await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   }catch(e){ /* best-effort: nao bloqueia o candidato */ }

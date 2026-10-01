@@ -12,20 +12,107 @@
       "name": "Webhook Candidatura",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [240, 300],
+      "position": [0, 300],
       "webhookId": "rh-candidatura"
     },
     {
       "parameters": {
-        "mode": "runOnceForEachItem",
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ (($json.body || $json).audios || []).filter(a => a && a.dataUrl).length > 0 }}",
+              "operator": { "type": "boolean", "operation": "true", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "tem-audio",
+      "name": "Gravou Audio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const b = $json.body || $json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst vids = Array.isArray(b.videos) ? b.videos : [];\n\nreturn { json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_videos: vids.length\n} };"
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\nconst nome = (b.nome || 'candidato').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40);\nconst carimbo = (b.data || new Date().toISOString()).replace(/[:.]/g, '-');\nconst audios = Array.isArray(b.audios) ? b.audios : [];\nreturn audios.filter(a => a && a.dataUrl).map((a, i) => {\n  const m = /^data:([^;,]+)[^,]*,(.*)$/.exec(a.dataUrl) || [];\n  const mime = a.mime || m[1] || 'audio/webm';\n  const ext = a.ext || (mime.indexOf('mp4') >= 0 ? 'm4a' : mime.indexOf('ogg') >= 0 ? 'ogg' : 'webm');\n  return { json: {\n    b64: m[2] || '',\n    mime: mime,\n    filename: carimbo + '_' + nome + '_resposta-' + (i + 1) + '.' + ext,\n    pergunta: a.pergunta != null ? a.pergunta : i\n  } };\n});"
+      },
+      "id": "separar-audios",
+      "name": "Separar Audios",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 180]
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "b64",
+        "options": {
+          "dataIsBase64": true,
+          "mimeType": "={{ $json.mime }}",
+          "fileName": "={{ $json.filename }}"
+        }
+      },
+      "id": "gerar-arquivo",
+      "name": "Gerar Arquivo de Audio",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [720, 180]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "upload",
+        "inputDataFieldName": "data",
+        "name": "={{ $('Separar Audios').item.json.filename }}",
+        "driveId": { "__rl": true, "mode": "list", "value": "My Drive", "cachedResultName": "My Drive" },
+        "folderId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc",
+          "cachedResultName": "Mandalog — Áudios Candidatos RH"
+        },
+        "options": { "simplifyOutput": true }
+      },
+      "id": "subir-drive",
+      "name": "Subir Audio no Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [960, 180],
+      "credentials": {
+        "googleDriveOAuth2Api": { "id": "0Gj09haV4VN6YkiR", "name": "Google Drive account" }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateIndividualFields",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            { "fieldToAggregate": "id", "renameField": true, "outputFieldName": "ids" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "agregar-links",
+      "name": "Agregar Links",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1200, 180]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const b = $('Webhook Candidatura').first().json.body || $('Webhook Candidatura').first().json;\nconst p = b.perfil || {};\nconst t = b.triagem_texto || {};\nconst auds = Array.isArray(b.audios) ? b.audios : [];\n\nlet ids = [];\ntry { ids = $('Agregar Links').first().json.ids || []; } catch (e) { ids = []; }\nconst links = ids.filter(Boolean).map(id => 'https://drive.google.com/file/d/' + id + '/view');\n\nreturn [{ json: {\n  data: b.data || new Date().toISOString(),\n  vaga: b.vaga || '',\n  nome: b.nome || '',\n  whatsapp: b.telefone || '',\n  email: b.email || '',\n  experiencia: t.exp || '',\n  app_rastreamento: t.app || '',\n  esl: t.esl || '',\n  regiao: t.bairro || '',\n  horario_pref: t.horario || '',\n  nota_final: b.nota_final ?? '',\n  pct_triagem: b.req_pct ?? '',\n  pct_tecnico: b.tecnico_pct ?? '',\n  comunicacao: p.COM ?? '',\n  senso_urgencia: p.URG ?? '',\n  gestao_conflitos: p.CONF ?? '',\n  proatividade: p.PRO ?? '',\n  cobranca_influencia: p.COB ?? '',\n  resiliencia: p.RES ?? '',\n  registro: p.REG ?? '',\n  pct_perfil: b.perfil_pct ?? '',\n  status: b.status || '',\n  foco_perdido: b.foco_perdido ?? 0,\n  qtd_audios: auds.length,\n  link_audios: links.join('\\n')\n} }];"
       },
       "id": "map-fields",
       "name": "Montar Linha",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [520, 300]
+      "position": [1440, 300]
     },
     {
       "parameters": {
@@ -70,7 +157,8 @@
             { "id": "pct_perfil", "displayName": "pct_perfil", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
             { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
             { "id": "foco_perdido", "displayName": "foco_perdido", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "qtd_videos", "displayName": "qtd_videos", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+            { "id": "qtd_audios", "displayName": "qtd_audios", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "link_audios", "displayName": "link_audios", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
           ]
         },
         "options": { "handlingExtraData": "ignoreIt" }
@@ -79,12 +167,9 @@
       "name": "Gravar na Planilha de Candidatos",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [800, 300],
+      "position": [1680, 300],
       "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "U19EKQk0BfI6Usmr",
-          "name": "automacao.ia@mandalog.com.br"
-        }
+        "googleSheetsOAuth2Api": { "id": "U19EKQk0BfI6Usmr", "name": "automacao.ia@mandalog.com.br" }
       }
     },
     {
@@ -97,22 +182,34 @@
       "name": "Responder ao Portal",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [1080, 300]
+      "position": [1920, 300]
     },
     {
       "parameters": {
-        "content": "## Captura de Candidatura — Portal SAC\n\nO portal envia o resultado para `/api/candidatura` (função na Vercel), que repassa para o webhook `POST /webhook/rh-candidatura` deste workflow.\n\n**Montar Linha** achata o payload em uma linha e **Gravar na Planilha** faz o append na aba `Candidatos` da planilha \"Mandalog — Candidatos RH\" (auto-map por nome de coluna).\n\nCorte atual: nota >= 85 chega com `status = AGENDAR_ENTREVISTA`.\n\n**Vídeo (fase 2):** adicionar um nó Google Drive para salvar `videos[].dataUrl` (base64) e gravar o link numa coluna `link_videos`.",
-        "color": 4
+        "content": "## Captura de Candidatura — Portal SAC\n\nO portal (vagas.mandalog.com.br) envia o resultado para `/api/candidatura` na Vercel, que repassa para `POST /webhook/rh-candidatura`.\n\n**Com áudio:** os arquivos vão para a pasta \"Mandalog — Áudios Candidatos RH\" no Drive e os links entram na coluna `link_audios`.\n**Sem áudio** (microfone negado): a linha é gravada do mesmo jeito, só sem link.\n\nCorte atual: nota >= 85 chega com `status = AGENDAR_ENTREVISTA`.\n\nLimite: o corpo da função da Vercel é de 4,5MB. O portal grava a 32kbps, ~300KB por resposta de 75s.",
+        "color": 4,
+        "height": 320,
+        "width": 420
       },
       "id": "nota",
       "name": "LEIA-ME",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [100, 300]
+      "position": [460, 480]
     }
   ],
   "connections": {
-    "Webhook Candidatura": { "main": [[{ "node": "Montar Linha", "type": "main", "index": 0 }]] },
+    "Webhook Candidatura": { "main": [[{ "node": "Gravou Audio?", "type": "main", "index": 0 }]] },
+    "Gravou Audio?": {
+      "main": [
+        [{ "node": "Separar Audios", "type": "main", "index": 0 }],
+        [{ "node": "Montar Linha", "type": "main", "index": 0 }]
+      ]
+    },
+    "Separar Audios": { "main": [[{ "node": "Gerar Arquivo de Audio", "type": "main", "index": 0 }]] },
+    "Gerar Arquivo de Audio": { "main": [[{ "node": "Subir Audio no Drive", "type": "main", "index": 0 }]] },
+    "Subir Audio no Drive": { "main": [[{ "node": "Agregar Links", "type": "main", "index": 0 }]] },
+    "Agregar Links": { "main": [[{ "node": "Montar Linha", "type": "main", "index": 0 }]] },
     "Montar Linha": { "main": [[{ "node": "Gravar na Planilha de Candidatos", "type": "main", "index": 0 }]] },
     "Gravar na Planilha de Candidatos": { "main": [[{ "node": "Responder ao Portal", "type": "main", "index": 0 }]] }
   },

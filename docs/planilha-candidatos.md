@@ -30,10 +30,13 @@ Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome
 | pct_perfil | % de aderência de perfil |
 | status | AGENDAR_ENTREVISTA ou EM_ANALISE |
 | foco_perdido | Nº de saídas de tela durante a prova |
-| qtd_videos | Quantidade de vídeos enviados |
+| qtd_audios | Quantidade de áudios gravados |
+| link_audios | Links dos áudios no Drive (um por linha) |
 
 > Corte atual: **nota ≥ 85** marca `status = AGENDAR_ENTREVISTA`.
 > Dica: deixe a coluna `nota_final` com formatação condicional (verde ≥ 85) para bater o olho.
 
-**Vídeo (opcional, fase 2):** adicionar uma coluna `link_videos` e um nó Google Drive no n8n
-que salva cada `videos[].dataUrl` (base64) numa pasta e grava o link aqui.
+**Áudios:** cada resposta da entrevista é gravada em áudio pelo portal, sobe para a pasta
+**"Mandalog — Áudios Candidatos RH"** no Drive (`18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc`) e o link
+entra em `link_audios`. Quando o candidato não libera o microfone, a linha é gravada do mesmo
+jeito, com `qtd_audios = 0` e `link_audios` vazio.

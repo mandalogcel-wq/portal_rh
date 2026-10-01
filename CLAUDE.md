@@ -5,6 +5,8 @@ dos resultados no Google Sheets via n8n. Siga na ordem. Peça ao Marcus só o qu
 for conta dele (logins/credenciais); o resto execute.
 
 ## Contexto
+- Jornada da vaga: **segunda a sábado**. Contato do RH para dúvidas: WhatsApp (11) 94749-5997
+  (QR code com mensagem pronta em `public/qr-rh-whatsapp.svg`).
 - Frontend estático em `public/index.html`. Função em `api/candidatura.js`.
 - O portal faz `POST /api/candidatura` com o resultado; a função repassa ao n8n
   (URL escondida em `N8N_WEBHOOK_CANDIDATURA`); o n8n grava uma linha na planilha.
@@ -52,9 +54,10 @@ for conta dele (logins/credenciais); o resto execute.
   a env var, e se o workflow está ATIVO e com a credencial Google reconectada.
 
 ## Fases seguintes (não bloqueiam o v1)
-- **Vídeo → Drive:** base64 pode passar de 4,5MB na função. Usar Vercel Blob
-  (`@vercel/blob`) ou um webhook de vídeo dedicado no n8n que salva no Drive e grava
-  o link na planilha. Ver docs/passo-a-passo.md.
+- ~~Vídeo → Drive~~ ✅ FEITO (virou áudio): a entrevista final grava **áudio** (32kbps,
+  ~300KB por resposta de 75s), o n8n sobe na pasta "Mandalog — Áudios Candidatos RH"
+  (`18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc`) e grava o link em `link_audios`. Folga grande
+  no limite de 4,5MB da função; se um dia voltar a ser vídeo, aí sim precisa de Vercel Blob.
 - **Agenda sem encavalar:** ligar os horários livres à agenda real dos gestores
   (Google Calendar) via n8n, para travar entre candidatos.
 - **Tráfego:** republicar a vaga / anúncios apontando para a URL do portal.
@@ -62,4 +65,6 @@ for conta dele (logins/credenciais); o resto execute.
 ## Decisões a confirmar com o Marcus
 - Projeto Vercel e domínio (ex.: vagas.mandalog.com.br).
 - Corte da nota (hoje 85) e gestores da entrevista.
+- Se a indisponibilidade aos sábados deve reprovar o candidato (hoje a resposta é só
+  registrada na triagem, sem peso na nota).
 - ESL e 1 ano de experiência: obrigatórios ou desejáveis (afeta só a pontuação da triagem).
