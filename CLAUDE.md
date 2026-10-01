@@ -58,8 +58,22 @@ for conta dele (logins/credenciais); o resto execute.
   ~300KB por resposta de 75s), o n8n sobe na pasta "Mandalog — Áudios Candidatos RH"
   (`18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc`) e grava o link em `link_audios`. Folga grande
   no limite de 4,5MB da função; se um dia voltar a ser vídeo, aí sim precisa de Vercel Blob.
-- **Agenda sem encavalar:** ligar os horários livres à agenda real dos gestores
-  (Google Calendar) via n8n, para travar entre candidatos.
+- **Agenda de entrevistas — PARCIAL.** Decidido: **Google Calendar + Meet** e **Z-API**
+  para o aviso no grupo de WhatsApp.
+  - Já feito: o portal envia o horário escolhido (`tipo=agendamento`, mesmo endpoint
+    `/api/candidatura`); um IF no início do workflow separa os dois tipos de envio e o
+    agendamento atualiza a linha do candidato pelo e-mail, gravando `entrevista_em`.
+    A tela final não promete mais entrevista confirmada — diz que o RH confirma pelo
+    WhatsApp.
+  - Falta (depende do Marcus): conectar a credencial do **Google Calendar** no n8n e
+    informar **instance, token e client-token da Z-API** mais o **ID do grupo**; e
+    definir os **gestores reais** (nome + e-mail) e a grade de horários — hoje
+    `genSlots()` gera 10h/14h/16h em dias úteis e o gestor era sorteado entre dois nomes
+    fixos (esse sorteio foi removido).
+  - Com isso ligado: criar o evento no Calendar com candidato e gestor convidados e
+    `conferenceData` para o Meet, gravar `meet_link`/`evento_id`/`entrevista_gestor` na
+    planilha, ler os horários livres da agenda real (trava entre candidatos) e postar o
+    convite no grupo via Z-API.
 - **Tráfego:** republicar a vaga / anúncios apontando para a URL do portal.
 
 ## Decisões a confirmar com o Marcus

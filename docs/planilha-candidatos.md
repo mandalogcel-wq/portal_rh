@@ -36,6 +36,10 @@ Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome
 | bairro | Bairro onde o candidato mora (cadastro) |
 | indicado | Veio pela campanha Indique e Ganhe (Sim/Não) |
 | indicado_por | Nome do colaborador que indicou (vazio se não houve indicação) |
+| entrevista_em | Horário escolhido pelo candidato na tela de agendamento |
+| entrevista_gestor | Gestor da entrevista (preenchido quando o Calendar estiver ligado) |
+| meet_link | Link do Google Meet (idem) |
+| evento_id | ID do evento no Google Calendar (idem) |
 
 > Corte atual: **nota ≥ 85** marca `status = AGENDAR_ENTREVISTA`.
 > Dica: deixe a coluna `nota_final` com formatação condicional (verde ≥ 85) para bater o olho.

@@ -28,6 +28,101 @@
           },
           "conditions": [
             {
+              "leftValue": "={{ ($json.body || $json).tipo }}",
+              "rightValue": "agendamento",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "e-agendamento",
+      "name": "E Agendamento?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        120,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA",
+          "cachedResultName": "Mandalog — Candidatos RH"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "861874780",
+          "cachedResultName": "Candidatos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "email"
+          ],
+          "value": {
+            "email": "={{ ($json.body || $json).email }}",
+            "entrevista_em": "={{ ($json.body || $json).entrevista_em }}"
+          },
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "entrevista_em",
+              "displayName": "entrevista_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "id": "grava-entrevista",
+      "name": "Gravar Horario da Entrevista",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        600,
+        640
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "U19EKQk0BfI6Usmr",
+          "name": "automacao.ia@mandalog.com.br"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
               "leftValue": "={{ (($json.body || $json).audios || []).filter(a => a && a.dataUrl).length > 0 }}",
               "operator": {
                 "type": "boolean",
@@ -496,7 +591,7 @@
       "main": [
         [
           {
-            "node": "Gravou Audio?",
+            "node": "E Agendamento?",
             "type": "main",
             "index": 0
           }
@@ -577,6 +672,35 @@
       ]
     },
     "Gravar na Planilha de Candidatos": {
+      "main": [
+        [
+          {
+            "node": "Responder ao Portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E Agendamento?": {
+      "main": [
+        [
+          {
+            "node": "Gravar Horario da Entrevista",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gravou Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gravar Horario da Entrevista": {
       "main": [
         [
           {

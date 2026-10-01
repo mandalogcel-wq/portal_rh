@@ -410,11 +410,24 @@ function screenAgenda(){st.screen='agenda';
  [...document.querySelectorAll('.slot:not(.taken)')].forEach(el=>el.onclick=()=>{sel=el.dataset.id;document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');conf.disabled=false;});
  conf.onclick=()=>{if(!sel)return;const taken=takenSet();if(taken.has(sel)){toast('Esse horário acabou de ser reservado. Escolha outro.');screenAgenda();return;}
   taken.add(sel);saveTaken(taken);
-  const slot=genSlots().find(s=>s.id===sel);const gestor=['Rodrigo (Gestor da conta)','Emanueli (Pessoas)'][Math.floor(Math.random()*2)];
+  conf.disabled=true;conf.textContent='Enviando...';
+  const slot=genSlots().find(s=>s.id===sel);
   const quando=slot.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+slot.time;
-  app.innerHTML=`<div class="card"><div class="eyebrow">Entrevista agendada ✓</div><h2 class="q-title" style="margin-bottom:14px">Tudo certo, ${st.cand.nome.split(' ')[0]}!</h2>
-   <div class="okbox"><b>Entrevista confirmada</b><br>${quando}<br>Com: ${gestor}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
-   <p class="small" style="margin-top:16px">Você vai receber a confirmação e um lembrete pelo WhatsApp. Em produção, o horário já entra na agenda do gestor e sai da lista para os demais candidatos.</p></div>`;};}
+  enviarAgendamento(slot,quando);
+  app.innerHTML=`<div class="card"><div class="eyebrow">Horário reservado</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
+   <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
+   <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou, com o convite da agenda e o link da chamada. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
+   ${blocoAjuda()}</div>`;};}
+
+/* Manda o horário escolhido para o n8n (mesmo endpoint, tipo diferente) */
+async function enviarAgendamento(slot,quando){
+  try{
+    await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo:'agendamento',vaga:VAGA.titulo,nome:st.cand.nome,email:st.cand.email,
+        telefone:st.cand.telefone,slot_id:slot.id,entrevista_iso:slot.date.toISOString().slice(0,10)+'T'+slot.time+':00',
+        entrevista_em:quando,data:new Date().toISOString()})});
+  }catch(e){ /* best-effort */ }
+}
 
 
 /* ===== ENVIO REAL (grava no Sheets via função serverless -> n8n) ===== */
