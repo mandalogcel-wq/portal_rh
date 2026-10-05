@@ -227,7 +227,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.z-api.io/instances/3F43345285C471E54550E6B1C9468980/token/97BB3194EB37842D3D161CCE/send-text",
+        "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
@@ -690,7 +690,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        1680,
+        2220,
         300
       ],
       "credentials": {
@@ -711,7 +711,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        1920,
+        2460,
         300
       ]
     },
@@ -730,6 +730,78 @@
         460,
         480
       ]
+    },
+    {
+      "id": "ia-montar-prompt",
+      "name": "Montar Prompt da IA",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        460
+      ],
+      "parameters": {
+        "jsCode": "const l = $json;\n\nconst sistema = [\n  'Você é um analista de RH da Mandalog, uma transportadora de last mile em Guarulhos/SP.',\n  'Está avaliando candidatos à vaga de Assistente de SAC — Monitoramento de Entregas (torre de controle de entregas), em Bonsucesso, Guarulhos/SP, com jornada de segunda a sábado.',\n  'A nota final vai de 0 a 100: 20% triagem de requisitos, 45% teste técnico de procedimento de SAC e 35% aderência de perfil. O corte hoje é 85.',\n  'As sete competências de perfil (0 a 100) são tendências medidas por questionário, sem certo ou errado.',\n  '',\n  'Regras:',\n  '- Baseie-se exclusivamente nos dados recebidos. Se algo não está nos dados, diga que não há informação; nunca invente.',\n  '- Não comente nem deduza gênero, idade, raça, origem, religião, estado civil, filhos, aparência, saúde ou qualquer outra característica pessoal protegida, nem a partir do nome.',\n  '- As respostas em áudio não foram transcritas: você sabe apenas quantas foram gravadas, não o conteúdo delas.',\n  '- Fale de evidências ligadas ao trabalho: experiência, ferramentas, procedimento, distância até o CD, disponibilidade e as competências medidas.',\n  '- Seja direto e específico, em português do Brasil. Nada de elogio genérico.',\n  '- As perguntas devem ser abertas e checar justamente os pontos fracos e as dúvidas que os dados deixaram.',\n  '',\n  'Responda SOMENTE com um JSON válido, sem markdown e sem texto em volta, neste formato:',\n  '{\"resumo\":\"3 a 5 frases\",\"fortes\":[\"até 3 itens curtos\"],\"atencao\":[\"até 3 itens curtos\"],\"perguntas\":[\"até 3 perguntas\"]}'\n].join('\n');\n\nconst dados = {\n  nota_final: l.nota_final,\n  pct_triagem: l.pct_triagem,\n  pct_tecnico: l.pct_tecnico,\n  pct_perfil: l.pct_perfil,\n  experiencia_sac_last_mile: l.experiencia,\n  app_rastreamento: l.app_rastreamento,\n  ja_usou_esl: l.esl,\n  regiao_onde_mora: l.regiao,\n  cidade: l.cidade,\n  bairro: l.bairro,\n  horario_preferido: l.horario_pref,\n  veio_por_indicacao: l.indicado,\n  competencias: {\n    comunicacao: l.comunicacao,\n    senso_urgencia: l.senso_urgencia,\n    gestao_conflitos: l.gestao_conflitos,\n    proatividade: l.proatividade,\n    cobranca_influencia: l.cobranca_influencia,\n    resiliencia: l.resiliencia,\n    registro: l.registro\n  },\n  saidas_de_tela_durante_a_prova: l.foco_perdido,\n  respostas_em_audio_gravadas: l.qtd_audios\n};\n\nconst prompt = 'Analise este candidato e devolva o JSON pedido.\n\n' + JSON.stringify(dados, null, 1);\n\nreturn [{ json: { linha: l, sistema, prompt } }];"
+      }
+    },
+    {
+      "id": "ia-analisar",
+      "name": "Analisar com IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1780,
+        460
+      ],
+      "notes": "Gera o resumo, os pontos fortes, os pontos de atencao e as perguntas de entrevista. Se falhar, segue em frente e a linha e gravada sem analise.",
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "sendHeaders": true,
+        "specifyHeaders": "keypair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\"model\":\"claude-opus-5-5\",\"max_tokens\":2500,\"output_config\":{\"effort\":\"low\"},\"system\":{{ JSON.stringify($json.sistema) }},\"messages\":[{\"role\":\"user\",\"content\":{{ JSON.stringify($json.prompt) }}}]}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "credentials": {
+        "anthropicApi": {
+          "id": "h1LSl7juXCwrsBPb",
+          "name": "Mandalog"
+        }
+      }
+    },
+    {
+      "id": "ia-juntar",
+      "name": "Juntar Analise",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        460
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "jsCode": "const base = $('Montar Prompt da IA').first().json.linha || {};\n\nlet txt = '';\ntry {\n  const blocos = $json.content || [];\n  for (const b of blocos) { if (b && b.type === 'text' && b.text) txt += b.text; }\n} catch (e) { txt = ''; }\n\nlet a = {};\nif (txt) {\n  const i = txt.indexOf('{');\n  const f = txt.lastIndexOf('}');\n  if (i >= 0 && f > i) { try { a = JSON.parse(txt.slice(i, f + 1)); } catch (e) { a = {}; } }\n}\n\nconst junta = (v) => Array.isArray(v) ? v.filter(Boolean).join(' · ') : (v || '');\n\nreturn [{ json: Object.assign({}, base, {\n  analise_ia: a.resumo || '',\n  fortes_ia: junta(a.fortes),\n  atencao_ia: junta(a.atencao),\n  perguntas_ia: junta(a.perguntas)\n}) }];"
+      }
     }
   ],
   "connections": {
@@ -810,7 +882,7 @@
       "main": [
         [
           {
-            "node": "Gravar na Planilha de Candidatos",
+            "node": "Montar Prompt da IA",
             "type": "main",
             "index": 0
           }
@@ -902,6 +974,39 @@
         [
           {
             "node": "Responder ao Portal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Prompt da IA": {
+      "main": [
+        [
+          {
+            "node": "Analisar com IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analisar com IA": {
+      "main": [
+        [
+          {
+            "node": "Juntar Analise",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Juntar Analise": {
+      "main": [
+        [
+          {
+            "node": "Gravar na Planilha de Candidatos",
             "type": "main",
             "index": 0
           }

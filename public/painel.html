@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel do RH — Mandalog · SAC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1B2A4A;--orange:#E8751A;--bg:#F7F8FA;--surface:#FFF;--ink:#1B2A4A;--muted:#64748B;--line:#E6E9EF;--danger:#DC2626;--ok:#059669;--shadow:0 10px 30px rgba(27,42,74,.08)}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.5}
+h1,h2,h3{font-family:'Outfit',system-ui,sans-serif;margin:0;line-height:1.15}
+a{color:var(--orange)}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(13,21,38,.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topbar-inner{max-width:1120px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:14px}
+.topbar img{height:26px;display:block}
+.topbar .quem{margin-left:auto;font-size:12.5px;color:#92A3BC;display:flex;align-items:center;gap:12px}
+.topbar .quem b{color:#E8EDF5;font-weight:600}
+.linkbtn{background:none;border:0;color:#92A3BC;font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0}
+.linkbtn:hover{color:#fff}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 18px 72px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow)}
+.eyebrow{font-size:12.5px;color:var(--orange);font-weight:600;margin-bottom:10px}
+label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:14px 0 6px}
+input,select{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;font:inherit;font-size:15px;color:var(--ink);background:#fff}
+input:focus,select:focus{outline:none;border-color:var(--orange)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;background:var(--orange);color:#fff;font-family:'Outfit';font-weight:700;font-size:15px;padding:14px 22px;cursor:pointer;transition:filter .15s;text-decoration:none}
+.btn:hover{filter:brightness(1.06)}.btn:disabled{opacity:.6;cursor:default}
+.btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.btn.sm{padding:9px 14px;font-size:13.5px;border-radius:10px}
+.erro{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:12px;padding:11px 14px;font-size:13.5px;margin-top:14px}
+.small{font-size:12.5px;color:var(--muted)}
+
+/* login */
+.login{max-width:410px;margin:8vh auto 0}
+.login .logo{text-align:center;margin-bottom:18px}
+.login .logo img{height:40px}
+
+/* kpis */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:15px 16px;box-shadow:var(--shadow)}
+.kpi b{display:block;font-family:'Outfit';font-size:26px;font-weight:800;color:var(--navy);line-height:1.1}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi.dest b{color:var(--orange)}
+
+/* filtros */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filtros input{flex:1 1 220px;width:auto;padding:11px 13px;font-size:14px}
+.filtros select{width:auto;flex:0 0 auto;padding:11px 13px;font-size:14px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Inter'}
+.chip.on{border-color:var(--orange);background:#FFF7EF;color:var(--orange)}
+
+/* lista */
+.lista{display:flex;flex-direction:column;gap:10px}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .15s,transform .1s}
+.row:hover{border-color:#C9D2E0}
+.row .nota{flex:0 0 auto;width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:'Outfit';font-weight:800;font-size:20px;background:#F1F4F9;color:var(--navy)}
+.row .nota.alta{background:#ECFDF5;color:#047857}
+.row .nota.media{background:#FFF7EF;color:#B45309}
+.row .nota.baixa{background:#F8FAFC;color:#94A3B8}
+.row .quem{min-width:0;flex:1}
+.row .quem b{font-family:'Outfit';font-size:15.5px;font-weight:700;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .meta{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto}
+.tag{font-size:11.5px;font-weight:600;border-radius:99px;padding:4px 10px;background:#F1F4F9;color:var(--muted);white-space:nowrap}
+.tag.ok{background:#ECFDF5;color:#047857}.tag.alerta{background:#FEF2F2;color:#B91C1C}
+.tag.agenda{background:#EFF6FF;color:#1D4ED8}.tag.ia{background:#F5F3FF;color:#6D28D9}
+.vazio{text-align:center;color:var(--muted);padding:48px 20px;font-size:14px}
+
+/* detalhe */
+.fundo{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;justify-content:flex-end}
+.painel{background:var(--bg);width:min(640px,100%);height:100%;overflow-y:auto;box-shadow:-10px 0 40px rgba(15,23,42,.2)}
+.painel header{position:sticky;top:0;background:rgba(13,21,38,.97);color:#fff;padding:16px 22px;display:flex;align-items:flex-start;gap:14px;z-index:2}
+.painel header h2{font-size:19px;color:#fff}
+.painel header .small{color:#92A3BC}
+.painel header .fechar{margin-left:auto;background:none;border:0;color:#92A3BC;font-size:26px;line-height:1;cursor:pointer;padding:0 2px}
+.painel .corpo{padding:20px 22px 60px;display:flex;flex-direction:column;gap:14px}
+.bloco{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.bloco h3{font-size:14.5px;color:var(--navy);margin-bottom:12px}
+.par{display:flex;justify-content:space-between;gap:14px;font-size:13.5px;padding:7px 0;border-bottom:1px dashed var(--line)}
+.par:last-child{border-bottom:0}
+.par span{color:var(--muted);flex:0 0 auto}
+.par b{font-weight:600;text-align:right;overflow-wrap:anywhere}
+.dimrow{margin-bottom:9px}
+.dimrow .top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}
+.dimrow .bar{height:7px;background:#F1F4F9;border-radius:99px;overflow:hidden}
+.dimrow .bar i{display:block;height:100%;background:var(--orange)}
+.radar{display:block;margin:0 auto 10px}
+.ia{background:linear-gradient(180deg,#FAF8FF,#fff);border-color:#E9E3FF}
+.ia h3{color:#5B21B6}
+.ia p{margin:0 0 12px;font-size:13.8px}
+.ia ul{margin:0 0 12px;padding-left:20px;font-size:13.5px}
+.ia li{margin-bottom:5px}
+.ia .rotulo{font-size:11.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:#6D28D9;margin:0 0 6px}
+.ia .rotulo.alerta{color:#B45309}
+.acoes{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}.row{flex-wrap:wrap}.row .tags{justify-content:flex-start;width:100%}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const DIMS={comunicacao:"Comunicação clara",senso_urgencia:"Senso de urgência",gestao_conflitos:"Gestão de conflitos",proatividade:"Proatividade",cobranca_influencia:"Cobrança e influência",resiliencia:"Resiliência",registro:"Capricho no registro"};
+const CORTE=85;
+const app=document.getElementById('app');
+let st={usuario:null,candidatos:[],filtro:'todos',busca:'',ordem:'nota',aberto:null};
+
+/* ===== util ===== */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=Number(String(v==null?'':v).replace(',','.'));return Number.isFinite(n)?n:0;};
+function dataCurta(iso){const d=new Date(iso);if(isNaN(d))return esc(iso||'—');
+ return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function zapLink(fone){const d=String(fone||'').replace(/\D/g,'');if(d.length<10)return null;
+ return 'https://wa.me/'+(d.length<=11?'55'+d:d);}
+function listaItens(txt){return String(txt||'').split(/\s*(?:\n|·|;|\|)\s*/).map(s=>s.replace(/^[-–•\d.)\s]+/,'').trim()).filter(Boolean);}
+
+async function api(acao,extra){
+ const r=await fetch('/api/painel',{method:'POST',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({acao,...(extra||{})})});
+ let d={};try{d=await r.json();}catch(e){}
+ // 401 no próprio login é senha errada — quem trata é a tela de login, que não
+ // pode ser redesenhada (apagaria o que a pessoa digitou).
+ if(r.status===401&&acao!=='login'){
+  // Sem usuário em memória é a primeira visita, não uma sessão perdida.
+  const aviso=st.usuario?'A sessão expirou. Entre de novo.':'';
+  st.usuario=null;telaLogin(aviso);throw new Error('401');
+ }
+ if(!r.ok||!d.ok)throw new Error(d.erro||'Falha na comunicação');
+ return d;
+}
+
+/* ===== login ===== */
+function telaLogin(aviso){
+ app.innerHTML=`<div class="wrap"><div class="login">
+  <div class="logo"><img src="/logo-mandalog.png" alt="Mandalog"></div>
+  <div class="card">
+   <div class="eyebrow">Acesso restrito</div>
+   <h2 style="font-size:20px;margin-bottom:4px">Painel de candidatos</h2>
+   <p class="small" style="margin:0">RH e gestores — vaga de Assistente de SAC.</p>
+   <form id="f" autocomplete="on">
+    <label for="e">E-mail</label>
+    <input id="e" type="email" name="email" autocomplete="username" required>
+    <label for="s">Senha</label>
+    <input id="s" type="password" name="password" autocomplete="current-password" required>
+    <button class="btn" id="b" style="width:100%;margin-top:20px">Entrar</button>
+   </form>
+   <div id="msg"></div>
+  </div>
+  <p class="small" style="text-align:center;margin-top:16px">Problemas para entrar? Fale com o RH no WhatsApp (11) 94749-5997.</p>
+ </div></div>`;
+ if(aviso)document.getElementById('msg').innerHTML=`<div class="erro">${esc(aviso)}</div>`;
+ document.getElementById('f').onsubmit=async ev=>{
+  ev.preventDefault();
+  const b=document.getElementById('b'),msg=document.getElementById('msg');
+  b.disabled=true;b.textContent='Entrando…';msg.innerHTML='';
+  try{
+   const d=await api('login',{email:document.getElementById('e').value,senha:document.getElementById('s').value});
+   st.usuario=d.usuario;await carrega();
+  }catch(err){
+   msg.innerHTML=`<div class="erro">${esc(err.message)}</div>`;
+   b.disabled=false;b.textContent='Entrar';
+  }};
+ document.getElementById('e').focus();
+}
+
+/* ===== carga ===== */
+async function carrega(){
+ app.innerHTML=`<div class="wrap"><div class="vazio">Carregando candidatos…</div></div>`;
+ try{
+  const d=await api('lista');
+  st.usuario=d.usuario||st.usuario;
+  st.candidatos=(d.candidatos||[]).map(normaliza).sort((a,b)=>b.nota-a.nota);
+  // O gestor abre direto na lista de quem precisa ser entrevistado.
+  st.filtro=st.usuario&&st.usuario.papel==='gestor'?'entrevistar':'todos';
+  telaPainel();
+ }catch(err){
+  if(err.message==='401')return;
+  app.innerHTML=`<div class="wrap"><div class="card"><div class="erro">${esc(err.message)}</div>
+   <button class="btn ghost sm" style="margin-top:14px" onclick="location.reload()">Tentar de novo</button></div></div>`;
+ }
+}
+
+function normaliza(c){
+ const o={...c};
+ o.nota=num(c.nota_final);
+ o.perfil={};Object.keys(DIMS).forEach(k=>{o.perfil[k]=num(c[k]);});
+ o.audios=listaItens(c.link_audios);
+ o.aprovado=o.nota>=CORTE||String(c.status||'').toUpperCase()==='AGENDAR_ENTREVISTA';
+ o.temIA=!!String(c.analise_ia||'').trim();
+ return o;
+}
+
+/* ===== painel ===== */
+function filtrados(){
+ const b=st.busca.trim().toLowerCase();
+ return st.candidatos.filter(c=>{
+  if(st.filtro==='entrevistar'&&!c.aprovado)return false;
+  if(st.filtro==='agendados'&&!String(c.entrevista_em||'').trim())return false;
+  if(st.filtro==='analise'&&c.aprovado)return false;
+  if(!b)return true;
+  return [c.nome,c.email,c.whatsapp,c.cidade,c.bairro].some(v=>String(v||'').toLowerCase().includes(b));
+ });
+}
+
+function telaPainel(){
+ const u=st.usuario||{nome:'',papel:'rh'};
+ const total=st.candidatos.length;
+ const aptos=st.candidatos.filter(c=>c.aprovado).length;
+ const agendados=st.candidatos.filter(c=>String(c.entrevista_em||'').trim()).length;
+ const media=total?Math.round(st.candidatos.reduce((a,c)=>a+c.nota,0)/total):0;
+ const chips=[['todos','Todos'],['entrevistar','A entrevistar'],['agendados','Com horário'],['analise','Em análise']];
+
+ app.innerHTML=`
+ <div class="topbar"><div class="topbar-inner">
+   <img src="/logo-mandalog-branco.png" alt="Mandalog">
+   <div class="quem"><span>Painel de candidatos · <b>${esc(u.nome)}</b> (${u.papel==='gestor'?'gestor':'RH'})</span>
+    <button class="linkbtn" id="sair">sair</button></div>
+ </div></div>
+ <div class="wrap">
+  <div class="kpis">
+   <div class="kpi"><b>${total}</b><span>candidatos</span></div>
+   <div class="kpi dest"><b>${aptos}</b><span>acima do corte (${CORTE})</span></div>
+   <div class="kpi"><b>${agendados}</b><span>com horário escolhido</span></div>
+   <div class="kpi"><b>${media}</b><span>nota média</span></div>
+  </div>
+  <div class="filtros">
+   <input id="busca" type="search" placeholder="Buscar por nome, e-mail, cidade…" value="${esc(st.busca)}">
+   <div class="chips">${chips.map(([k,l])=>`<button class="chip ${st.filtro===k?'on':''}" data-f="${k}">${l}</button>`).join('')}</div>
+   <select id="ordem">
+    <option value="nota"${st.ordem==='nota'?' selected':''}>Maior nota</option>
+    <option value="data"${st.ordem==='data'?' selected':''}>Mais recentes</option>
+    <option value="nome"${st.ordem==='nome'?' selected':''}>Nome (A–Z)</option>
+   </select>
+  </div>
+  <div class="lista" id="lista"></div>
+ </div>`;
+
+ document.getElementById('sair').onclick=async()=>{try{await api('logout');}catch(e){}st={usuario:null,candidatos:[],filtro:'todos',busca:'',ordem:'nota',aberto:null};telaLogin();};
+ const busca=document.getElementById('busca');
+ busca.oninput=()=>{st.busca=busca.value;desenhaLista();};
+ document.getElementById('ordem').onchange=e=>{st.ordem=e.target.value;desenhaLista();};
+ app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{st.filtro=b.dataset.f;telaPainel();document.getElementById('busca').value=st.busca;});
+ desenhaLista();
+}
+
+function desenhaLista(){
+ const alvo=document.getElementById('lista');
+ let itens=filtrados();
+ if(st.ordem==='data')itens=[...itens].sort((a,b)=>new Date(b.data||0)-new Date(a.data||0));
+ else if(st.ordem==='nome')itens=[...itens].sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+ else itens=[...itens].sort((a,b)=>b.nota-a.nota);
+
+ if(!itens.length){alvo.innerHTML=`<div class="vazio">Nenhum candidato nesse filtro.</div>`;return;}
+
+ alvo.innerHTML=itens.map((c,i)=>{
+  const cls=c.nota>=CORTE?'alta':c.nota>=70?'media':'baixa';
+  const tags=[];
+  if(c.aprovado)tags.push('<span class="tag ok">acima do corte</span>');
+  if(String(c.entrevista_em||'').trim())tags.push(`<span class="tag agenda">${esc(c.entrevista_em)}</span>`);
+  if(c.temIA)tags.push('<span class="tag ia">análise da IA</span>');
+  if(String(c.indicado||'').toLowerCase().startsWith('s'))tags.push('<span class="tag">indicação</span>');
+  if(num(c.foco_perdido)>2)tags.push(`<span class="tag alerta">saiu da tela ${num(c.foco_perdido)}x</span>`);
+  if(!c.audios.length)tags.push('<span class="tag">sem áudio</span>');
+  return `<div class="row" data-i="${st.candidatos.indexOf(c)}">
+   <div class="nota ${cls}">${c.nota}</div>
+   <div class="quem"><b>${esc(c.nome||'(sem nome)')}</b>
+    <div class="meta">${esc([c.cidade,c.bairro].filter(Boolean).join(' · ')||'—')} · recebido ${dataCurta(c.data)}</div></div>
+   <div class="tags">${tags.join('')}</div></div>`;
+ }).join('');
+
+ alvo.querySelectorAll('.row').forEach(r=>r.onclick=()=>abre(st.candidatos[Number(r.dataset.i)]));
+}
+
+/* ===== detalhe ===== */
+function radarSVG(prof){
+ const keys=Object.keys(DIMS),N=keys.length,cx=140,cy=140,R=92;
+ const pt=(i,r)=>{const a=(-90+i*360/N)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+ let grid='';[.25,.5,.75,1].forEach(f=>{grid+=`<polygon points="${keys.map((k,i)=>pt(i,R*f).join(',')).join(' ')}" fill="none" stroke="#E6E9EF" stroke-width="1"/>`;});
+ let axes='',labels='';
+ keys.forEach((k,i)=>{const[x,y]=pt(i,R);axes+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#E6E9EF" stroke-width="1"/>`;
+  const[lx,ly]=pt(i,R+20);const an=Math.abs(lx-cx)<6?'middle':(lx>cx?'start':'end');
+  labels+=`<text x="${lx}" y="${ly+4}" font-size="9.5" font-family="Outfit,sans-serif" font-weight="600" fill="#1B2A4A" text-anchor="${an}">${DIMS[k].split(' ')[0]}</text>`;});
+ const data=keys.map((k,i)=>pt(i,R*(prof[k]/100)).join(',')).join(' ');
+ return `<svg class="radar" width="280" height="285" viewBox="0 0 280 285">${grid}${axes}<polygon points="${data}" fill="rgba(232,117,26,.22)" stroke="#E8751A" stroke-width="2"/>${labels}</svg>`;
+}
+
+function par(rotulo,valor){return `<div class="par"><span>${rotulo}</span><b>${valor==null||valor===''?'—':valor}</b></div>`;}
+
+function blocoIA(c){
+ if(!c.temIA)return `<div class="bloco ia"><h3>Análise da IA</h3>
+  <p class="small" style="margin:0">Esta candidatura foi recebida antes da análise automática entrar no ar — ou a análise falhou naquele envio. Os números acima continuam valendo.</p></div>`;
+ const fortes=listaItens(c.fortes_ia),atencao=listaItens(c.atencao_ia),perguntas=listaItens(c.perguntas_ia);
+ return `<div class="bloco ia"><h3>Análise da IA</h3>
+  <p>${esc(c.analise_ia)}</p>
+  ${fortes.length?`<p class="rotulo">Pontos fortes</p><ul>${fortes.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>`:''}
+  ${atencao.length?`<p class="rotulo alerta">Pontos de atenção</p><ul>${atencao.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>`:''}
+  ${perguntas.length?`<p class="rotulo">Perguntas para a entrevista presencial</p><ul>${perguntas.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>`:''}
+  <p class="small" style="margin:12px 0 0">Gerada por IA a partir das respostas do candidato. É um apoio à decisão, não a decisão.</p></div>`;
+}
+
+function abre(c){
+ if(!c)return;
+ st.aberto=c;
+ const zap=zapLink(c.whatsapp);
+ const dims=Object.keys(DIMS).map(k=>`<div class="dimrow"><div class="top"><b>${DIMS[k]}</b><span>${c.perfil[k]}%</span></div>
+  <div class="bar"><i style="width:${Math.max(0,Math.min(100,c.perfil[k]))}%"></i></div></div>`).join('');
+
+ const fundo=document.createElement('div');
+ fundo.className='fundo';
+ fundo.innerHTML=`<div class="painel" role="dialog" aria-label="Candidato">
+  <header>
+   <div><h2>${esc(c.nome||'(sem nome)')}</h2>
+    <div class="small">Nota ${c.nota} · ${c.aprovado?'acima do corte':'em análise'} · recebido ${dataCurta(c.data)}</div></div>
+   <button class="fechar" aria-label="Fechar">&times;</button>
+  </header>
+  <div class="corpo">
+   ${blocoIA(c)}
+   <div class="bloco"><h3>Contato e localização</h3>
+    ${par('WhatsApp',esc(c.whatsapp))}${par('E-mail',esc(c.email))}
+    ${par('Cidade',esc(c.cidade))}${par('Bairro',esc(c.bairro))}
+    ${par('Indicação',String(c.indicado||'').toLowerCase().startsWith('s')?esc(c.indicado_por||'Sim'):'Não')}
+    <div class="acoes" style="margin-top:14px">
+     ${zap?`<a class="btn sm" href="${zap}" target="_blank" rel="noopener">Abrir WhatsApp</a>`:''}
+     ${c.email?`<a class="btn ghost sm" href="mailto:${esc(c.email)}">Enviar e-mail</a>`:''}
+    </div></div>
+   <div class="bloco"><h3>Notas</h3>
+    ${par('Nota final',`<b style="color:${c.aprovado?'#047857':'var(--navy)'}">${c.nota}</b> / 100`)}
+    ${par('Triagem (requisitos)',num(c.pct_triagem)+'%')}
+    ${par('Teste técnico',num(c.pct_tecnico)+'%')}
+    ${par('Aderência de perfil',num(c.pct_perfil)+'%')}
+    ${par('Saídas de tela na prova',num(c.foco_perdido))}</div>
+   <div class="bloco"><h3>Perfil nas 7 competências do SAC</h3>${radarSVG(c.perfil)}${dims}</div>
+   <div class="bloco"><h3>Triagem</h3>
+    ${par('Experiência em SAC / last mile',esc(c.experiencia))}
+    ${par('App de rastreamento',esc(c.app_rastreamento))}
+    ${par('Já usou ESL',esc(c.esl))}
+    ${par('Região onde mora',esc(c.regiao))}
+    ${par('Horário preferido',esc(c.horario_pref))}</div>
+   <div class="bloco"><h3>Entrevista em áudio</h3>
+    ${c.audios.length?`<p class="small" style="margin:0 0 10px">${c.audios.length} resposta(s) gravada(s). Abrem no Google Drive.</p>
+      <div class="acoes">${c.audios.map((l,i)=>`<a class="btn ghost sm" href="${esc(l)}" target="_blank" rel="noopener">Áudio ${i+1}</a>`).join('')}</div>`
+     :`<p class="small" style="margin:0">Sem áudio — o candidato não liberou o microfone ou a gravação falhou.</p>`}</div>
+   <div class="bloco"><h3>Entrevista presencial</h3>
+    ${par('Horário escolhido pelo candidato',esc(c.entrevista_em)||'não escolheu')}
+    ${par('Gestor',esc(c.entrevista_gestor)||'Rodrigo Freitas')}
+    <p class="small" style="margin:12px 0 0">O horário é a preferência do candidato — a confirmação sai pelo WhatsApp do RH. Dois candidatos podem ter escolhido o mesmo horário.</p></div>
+  </div></div>`;
+
+ const fecha=()=>{fundo.remove();st.aberto=null;document.body.style.overflow='';document.removeEventListener('keydown',esq);};
+ const esq=ev=>{if(ev.key==='Escape')fecha();};
+ fundo.onclick=ev=>{if(ev.target===fundo)fecha();};
+ fundo.querySelector('.fechar').onclick=fecha;
+ document.addEventListener('keydown',esq);
+ document.body.style.overflow='hidden';
+ document.body.appendChild(fundo);
+}
+
+/* ===== entrada ===== */
+(async function(){
+ try{const d=await api('sessao');st.usuario=d.usuario;await carrega();}
+ catch(err){if(err.message!=='401')telaLogin();}
+})();
+</script>
+</body>
+</html>

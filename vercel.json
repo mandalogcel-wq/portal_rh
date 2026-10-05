@@ -2,6 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "functions": {
-    "api/candidatura.js": { "maxDuration": 15 }
+    "api/candidatura.js": { "maxDuration": 30 },
+    "api/painel.js": { "maxDuration": 30 }
   }
 }

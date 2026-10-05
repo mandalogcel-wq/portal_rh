@@ -1,0 +1,84 @@
+{
+  "name": "RH - Painel de Candidatos (leitura)",
+  "nodes": [
+    {
+      "id": "8612cf1a-9e63-438a-a324-afee866136ea",
+      "name": "Webhook Painel",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "webhookId": "b1d3b484-8032-4ac0-b6a3-459cf3a12720",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rh-painel",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "SUBSTITUIR",
+          "name": "Painel RH Token (header X-Painel-Token)"
+        }
+      }
+    },
+    {
+      "id": "df8f6411-dd43-4ff5-b966-599aff79277d",
+      "name": "Ler Candidatos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [224, 0],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA",
+          "cachedResultName": "Mandalog — Candidatos RH"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "861874780",
+          "cachedResultName": "Candidatos"
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "U19EKQk0BfI6Usmr",
+          "name": "automacao.ia@mandalog.com.br"
+        }
+      }
+    },
+    {
+      "id": "ba37423f-092a-43ba-bb3b-4ab5edcc11bd",
+      "name": "Montar Lista",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [448, 0],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const campos = ['data','vaga','nome','whatsapp','email','experiencia','app_rastreamento','esl','regiao','horario_pref','nota_final','pct_triagem','pct_tecnico','comunicacao','senso_urgencia','gestao_conflitos','proatividade','cobranca_influencia','resiliencia','registro','pct_perfil','status','foco_perdido','qtd_audios','link_audios','cidade','bairro','indicado','indicado_por','entrevista_em','entrevista_gestor','analise_ia','fortes_ia','atencao_ia','perguntas_ia'];\n\nconst saida = [];\nfor (const it of items) {\n  const j = it.json || {};\n  if (!String(j.nome || '').trim() && !String(j.email || '').trim()) continue;\n  const o = {};\n  for (const c of campos) { o[c] = (j[c] === null || j[c] === undefined) ? '' : j[c]; }\n  saida.push({ json: o });\n}\n\nsaida.sort((a, b) => new Date(b.json.data || 0) - new Date(a.json.data || 0));\nreturn saida;"
+      }
+    },
+    {
+      "id": "d00e2a59-2aca-4d79-b06c-1af5a4213730",
+      "name": "Responder Painel",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [672, 0],
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": { "responseKey": "candidatos" }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Painel": { "main": [[{ "node": "Ler Candidatos", "type": "main", "index": 0 }]] },
+    "Ler Candidatos": { "main": [[{ "node": "Montar Lista", "type": "main", "index": 0 }]] },
+    "Montar Lista": { "main": [[{ "node": "Responder Painel", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

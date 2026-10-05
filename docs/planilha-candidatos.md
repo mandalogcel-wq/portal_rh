@@ -40,8 +40,14 @@ Primeira linha (cabeçalho), exatamente nesta ordem (o n8n usa auto-map por nome
 | entrevista_gestor | Gestor da entrevista (preenchido quando o Calendar estiver ligado) |
 | meet_link | Link do Google Meet (idem) |
 | evento_id | ID do evento no Google Calendar (idem) |
+| analise_ia | Resumo da análise do candidato feita pela IA |
+| fortes_ia | Pontos fortes, separados por ` · ` |
+| atencao_ia | Pontos de atenção, separados por ` · ` |
+| perguntas_ia | Perguntas sugeridas para a entrevista, separadas por ` · ` |
 
 > Corte atual: **nota ≥ 85** marca `status = AGENDAR_ENTREVISTA`.
+> Atenção: dos 10 primeiros candidatos reais, **nenhum** chegou a 85 (o maior foi 81).
+> O que puxa as notas para baixo é o teste técnico — ver "Decisões a confirmar" no CLAUDE.md.
 > Dica: deixe a coluna `nota_final` com formatação condicional (verde ≥ 85) para bater o olho.
 
 **Áudios:** cada resposta da entrevista é gravada em áudio pelo portal, sobe para a pasta
