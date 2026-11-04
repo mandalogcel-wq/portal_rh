@@ -5,11 +5,15 @@ dos resultados no Google Sheets via n8n. Siga na ordem. Peça ao Marcus só o qu
 for conta dele (logins/credenciais); o resto execute.
 
 ## Contexto
-- Jornada da vaga: **segunda a sábado**. Contato do RH para dúvidas: WhatsApp (11) 94749-5997
+- **Portal multi-vagas desde 04/11.** `public/index.html` é só o motor; o conteúdo de
+  cada vaga vive em `public/vagas/<slug>.json` e a lista em `public/vagas/index.json`.
+  `/` lista as abertas, `/?vaga=slug` abre uma. Ver `docs/vagas.md`.
+- Contato do RH para dúvidas: WhatsApp (11) 94749-5997
   (QR code com mensagem pronta em `public/qr-rh-whatsapp.svg`).
-- Frontend estático em `public/index.html`. Função em `api/candidatura.js`.
-- O portal faz `POST /api/candidatura` com o resultado; a função repassa ao n8n
-  (URL escondida em `N8N_WEBHOOK_CANDIDATURA`); o n8n grava uma linha na planilha.
+- Função serverless em `api/candidatura.js`.
+- O portal faz `POST /api/candidatura` com o resultado, sempre com `vaga_slug`;
+  a função repassa ao n8n (URL escondida em `N8N_WEBHOOK_CANDIDATURA`); o n8n grava
+  uma linha na planilha.
 - Painel do RH e dos gestores em `public/painel.html` + `api/painel.js`
   (login, sessão em cookie assinado, leitura da planilha via n8n). Ver `docs/painel-rh.md`.
 - n8n do Marcus: editor em `n8n-editor.zqpvje.easypanel.host`, webhooks de produção
@@ -131,6 +135,15 @@ Usuários novos: `node scripts/gerar-senha.mjs "email" "Nome" rh|gestor`.
   analisados retroativamente. Se a IA cair, a linha é gravada sem a análise —
   isso foi testado de propósito, quebrando a URL da Anthropic.
 - **Tráfego:** republicar a vaga / anúncios apontando para a URL do portal.
+
+## Vagas
+- **SAC — Assistente de SAC** (`sac`): ✅ **PREENCHIDA** em 11/2026, status `encerrada`.
+  28 candidatos, 1 acima do corte de 85.
+- **Analista de Controladoria Pleno** (`controladoria`): JSON escrito, **ainda não
+  listado** em `vagas/index.json` (revisão pelo link direto `/?vaga=controladoria`).
+  Falta: gestor (nome/e-mail), confirmar local e jornada, e o grupo de WhatsApp.
+  Corte 70, pesos 30/35/35, 5 competências (ANA, ORG, PRO, PRI, COM).
+- **Coordenador de Armazém Geral**: descrição ainda não recebida.
 
 ## Decisões a confirmar com o Marcus
 - **Corte da nota (hoje 85) — o mais urgente.** Dos 10 candidatos reais recebidos até

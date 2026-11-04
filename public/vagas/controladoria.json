@@ -1,0 +1,128 @@
+{
+ "slug": "controladoria",
+ "status": "aberta",
+ "titulo": "Analista de Controladoria Pleno",
+ "local": "Guarulhos/SP · 1 vaga",
+ "jornada": "Segunda a sexta",
+ "resumo": "Conferência de fretes, faturamento (CT-e, MDF-e e faturas), custos operacionais, conciliação e gestão da inadimplência.",
+ "lead": "Você vai ser a ponte entre o Financeiro e a Operação: conferir frete contra tabela, faturar CT-e e manifestos, conciliar recebimentos, cobrar quem está em atraso e mostrar, com número na mão, onde a margem está escapando.",
+ "local_entrevista": "Escritório Mandalog — Guarulhos/SP",
+ "corte": 70,
+ "pesos": { "triagem": 0.30, "tecnico": 0.35, "perfil": 0.35 },
+ "gestor": { "nome": "", "email": "" },
+ "agenda": {
+  "janelas": [
+   { "nome": "Manhã", "inicio": "10:00", "fim": "12:00" },
+   { "nome": "Tarde", "inicio": "14:00", "fim": "16:00" }
+  ],
+  "passo": 30, "duracao": 30, "dias": 5, "sabado": false
+ },
+ "passos": [
+  { "titulo": "Triagem", "desc": "Experiência, documentos fiscais e Excel" },
+  { "titulo": "Teste técnico", "desc": "Situações reais de frete, faturamento e conciliação" },
+  { "titulo": "Comportamento e valores", "desc": "Como você age no dia a dia" },
+  { "titulo": "Entrevista em áudio", "desc": "Você grava a resposta pelo microfone, na hora" }
+ ],
+
+ "dims": {
+  "ANA": "Análise crítica",
+  "ORG": "Organização e detalhe",
+  "PRO": "Proatividade",
+  "PRI": "Priorização",
+  "COM": "Comunicação firme"
+ },
+
+ "triagem": [
+  { "id": "exp", "label": "Quantos anos de experiência você tem em rotinas financeiras, faturamento ou controladoria?",
+    "op": [["Mais de 3 anos", 3], ["De 2 a 3 anos", 2], ["De 1 a 2 anos", 1], ["Menos de 1 ano", 0]] },
+  { "id": "frete", "label": "Você já fez conferência de frete ou trabalhou em operação de transporte?",
+    "op": [["Sim, fazia conferência de frete no dia a dia", 3], ["Sim, trabalhei em transporte, mas sem conferir frete", 2], ["Não, minha experiência é em outro setor", 0]] },
+  { "id": "fiscal", "label": "Com quais documentos fiscais você já trabalhou na prática?",
+    "op": [["CT-e, MDF-e e NF-e", 3], ["CT-e e NF-e, sem MDF-e", 2], ["Só NF-e", 1], ["Nenhum deles", 0]] },
+  { "id": "excel", "label": "Qual é o seu nível de Excel?",
+    "op": [["Avançado — PROCV/ÍNDICE+CORRESP, tabelas dinâmicas e automações", 3], ["Intermediário — PROCV e tabelas dinâmicas", 2], ["Básico — digito e uso fórmulas simples", 0]] },
+  { "id": "sistema", "label": "Você já usou o ESL ou outro sistema de gestão logística/financeira?",
+    "op": [["Sim, já usei o ESL", 2], ["Sim, outro sistema (TOTVS, Senior, SAP ou similar)", 1], ["Nunca usei", 0]] },
+  { "id": "cobranca", "label": "Você já foi responsável por cobrança e acompanhamento de inadimplência?", "score": false,
+    "op": [["Sim, era responsável pela carteira", 0], ["Participava, mas não era o responsável", 0], ["Nunca fiz", 0]] }
+ ],
+
+ "secoes": [
+  {
+   "id": "tecnico", "nome": "Teste Técnico", "eyebrow": "Rotinas de frete, faturamento e conciliação (há resposta correta)", "tempo": 75, "tipo": "mcq",
+   "questoes": [
+    { "q": "A fatura de um agregado veio R$ 480 acima do que a tabela prevê para aquela rota. Sua primeira ação é:", "op": [
+      { "t": "Glosar a diferença e lançar o valor da tabela, informando o agregado no fechamento" },
+      { "t": "Conferir o que foi executado na rota — peso, número de entregas, pedágio, ajudante — contra a tabela, e só então apontar a divergência com a evidência", "correta": true },
+      { "t": "Pagar o valor cobrado e ajustar a diferença na fatura do mês seguinte" },
+      { "t": "Encaminhar a fatura ao gestor da operação para ele decidir se o valor procede" }
+     ] },
+    { "q": "Um CT-e foi emitido com o tomador errado e a prestação ainda não começou. O procedimento correto é:", "op": [
+      { "t": "Emitir uma carta de correção apontando o tomador certo" },
+      { "t": "Emitir um CT-e complementar com os dados corretos" },
+      { "t": "Cancelar o CT-e dentro do prazo legal e emitir um novo com o tomador correto", "correta": true },
+      { "t": "Manter o CT-e e corrigir o tomador na fatura enviada ao cliente" }
+     ] },
+    { "q": "Sobre o MDF-e, é correto afirmar que:", "op": [
+      { "t": "Ele é encerrado automaticamente quando o CT-e vinculado é autorizado" },
+      { "t": "Precisa ser encerrado ao fim da viagem; se ficar em aberto, trava a emissão de novos manifestos", "correta": true },
+      { "t": "É encerrado em lote, no fechamento mensal da operação" },
+      { "t": "Só é obrigatório quando a carga tem mais de um destinatário" }
+     ] },
+    { "q": "Um cliente pagou um título a menor, sem aviso. O correto é:", "op": [
+      { "t": "Dar baixa integral no título e lançar a diferença como despesa financeira" },
+      { "t": "Deixar o título em aberto até o cliente explicar o desconto" },
+      { "t": "Baixar o valor recebido, manter a diferença vinculada ao título e apurar a causa com o cliente e com a Operação", "correta": true },
+      { "t": "Cancelar a fatura e emitir uma nova já com o valor que o cliente pagou" }
+     ] },
+    { "q": "A margem de uma rota fechou negativa no mês. Antes de levar isso à liderança, você:", "op": [
+      { "t": "Reporta o número como está — a apuração é responsabilidade da Operação" },
+      { "t": "Abre a composição da rota (receita dos CT-e × custos de agregado, pedágio, ajudante e combustível) e confere se há CT-e não faturado ou custo lançado na rota errada", "correta": true },
+      { "t": "Compara com a margem do mês anterior e, se a queda for pequena, aguarda o próximo fechamento" },
+      { "t": "Revisa a tabela de preços do cliente e propõe reajuste" }
+     ] },
+    { "q": "Ao cruzar a planilha de faturas com a tabela de preços, o PROCV retorna #N/D em parte das linhas. O que isso normalmente indica?", "op": [
+      { "t": "Que essas rotas realmente não estão na tabela e devem ser apontadas como divergência" },
+      { "t": "Que a chave de busca está diferente entre as duas bases — espaço sobrando, texto onde deveria ser número — e precisa ser padronizada antes de concluir qualquer coisa", "correta": true },
+      { "t": "Que o intervalo da tabela precisa ser travado com $ e o problema se resolve" },
+      { "t": "Que o PROCV deveria estar no modo aproximado para encontrar o valor mais próximo" }
+     ] },
+    { "q": "Um título está vencido há 15 dias e é de um cliente ativo, que continua gerando coleta todo dia. O caminho correto é:", "op": [
+      { "t": "Suspender a coleta imediatamente até o pagamento entrar" },
+      { "t": "Seguir a régua de cobrança, registrar cada contato e alinhar com a Operação e a liderança antes de qualquer suspensão", "correta": true },
+      { "t": "Aguardar o fechamento do mês para cobrar junto com os demais títulos" },
+      { "t": "Protestar o título, já que passou do vencimento" }
+     ] }
+   ]
+  },
+  {
+   "id": "comportamento", "nome": "Comportamento", "eyebrow": "O quanto combina com você (não há resposta certa)", "tempo": 30, "tipo": "likert",
+   "questoes": [
+    { "t": "Quando um número não fecha, eu vou atrás da causa até achar — não arredondo nem deixo para depois.", "dim": "ANA" },
+    { "t": "Confiro duas vezes antes de mandar: fatura, valor, tomador e anexo.", "dim": "ORG" },
+    { "t": "Quando vejo uma divergência se repetindo, proponho mudar o processo sem ninguém pedir.", "dim": "PRO" },
+    { "t": "Com várias demandas ao mesmo tempo, decido o que fica para depois e aviso quem depende disso.", "dim": "PRI" },
+    { "t": "Cobro retorno de outra área com firmeza e respeito, mesmo quando é de alguém mais sênior.", "dim": "COM" },
+    { "t": "Em dia de fechamento, com tudo chegando junto, eu me perco na ordem das tarefas.", "dim": "PRI", "rev": true },
+    { "t": "Gosto de transformar o número em uma frase clara: o que mudou, por quê e o que fazer.", "dim": "COM" }
+   ]
+  },
+  {
+   "id": "valores", "nome": "Valores no trabalho", "eyebrow": "O que mais combina com você (as duas são boas; não há certo)", "tempo": 25, "tipo": "fc",
+   "questoes": [
+    { "a": { "t": "Entrego no prazo, mesmo que falte um detalhe pequeno.", "dim": "PRI" }, "b": { "t": "Confiro tudo antes de entregar, mesmo que atrase um pouco.", "dim": "ORG" } },
+    { "a": { "t": "Me sinto bem quando descubro a causa de uma diferença.", "dim": "ANA" }, "b": { "t": "Me sinto bem quando evito que ela aconteça de novo.", "dim": "PRO" } },
+    { "a": { "t": "Insisto até a outra área responder o que eu preciso.", "dim": "COM" }, "b": { "t": "Organizo o meu lado para depender menos dos outros.", "dim": "ORG" } },
+    { "a": { "t": "Prefiro entender o processo inteiro antes de mexer.", "dim": "ANA" }, "b": { "t": "Prefiro resolver o que está travando agora e ajustar depois.", "dim": "PRI" } }
+   ]
+  }
+ ],
+
+ "audio": {
+  "nome": "Entrevista em Áudio", "eyebrow": "Resposta gravada em áudio", "tempo": 75,
+  "questoes": [
+   "Conte uma divergência financeira real que você encontrou e resolveu: como percebeu, o que investigou e o que mudou depois.",
+   "Descreva como era a sua rotina de fechamento ou de faturamento: o que você fazia, em que ordem, e o que conferia antes de liberar."
+  ]
+ }
+}
