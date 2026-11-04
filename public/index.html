@@ -29,6 +29,12 @@ h1,h2,h3{font-family:'Outfit',system-ui,sans-serif;margin:0;line-height:1.15}
 .timer.crit{border-color:#F6B5B5;animation:pulse 1s infinite}.timer.crit .num{color:var(--danger)}
 @keyframes pulse{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 4px rgba(220,38,38,.12)}}
 @media (prefers-reduced-motion:reduce){.timer.crit{animation:none}}
+.vagacard{display:block;text-decoration:none;color:inherit;border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:border-color .15s,transform .1s;background:#fff}
+.vagacard:hover{border-color:var(--orange);transform:translateY(-1px)}
+.vagacard b{display:block;font-family:'Outfit';font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.vagacard .meta{display:block;font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.vagacard .res{display:block;font-size:14px;margin-bottom:10px}
+.vagacard .cta{display:inline-block;font-family:'Outfit';font-weight:700;font-size:13.5px;color:var(--orange)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px 24px;box-shadow:var(--shadow)}
 .eyebrow{font-size:12.5px;color:var(--orange);font-weight:600;margin-bottom:10px}
 .q-title{font-size:19.5px;font-weight:700;color:var(--navy);margin-bottom:20px}.q-title .qcount{color:var(--muted);font-weight:600;font-size:14px}
@@ -117,94 +123,36 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 <div class="wrap" id="app"></div>
 <div class="toast" id="toast"></div>
 <script>
-/* ===== VAGA ===== */
-const VAGA={titulo:"Assistente de SAC — Monitoramento de Entregas",local:"Bonsucesso, Guarulhos/SP · 2 vagas",
-  jornada:"Segunda a sábado",corte:85};
-/* 7 competências da descrição do cargo */
-const DIMS={COM:"Comunicação clara",URG:"Senso de urgência",CONF:"Gestão de conflitos",PRO:"Proatividade",COB:"Cobrança e influência",RES:"Resiliência",REG:"Capricho no registro"};
+/* ===== VAGA =====
+   Este arquivo e so o MOTOR: cronometro, gravacao de audio, nota, radar e envio.
+   O conteudo de cada vaga (titulo, triagem, questoes, competencias, perguntas de
+   audio, corte, pesos, gestor e agenda) mora em /vagas/<slug>.json.
+   Para abrir uma vaga nova: escreva o JSON dela e acrescente uma linha em
+   /vagas/index.json. Nenhuma linha deste arquivo precisa mudar. */
+let VAGA={},DIMS={},TRIAGEM=[],SECOES=[],VIDEO={questoes:[]},GESTOR={},AGENDA={},PESOS={};
+let VAGA_SLUG='',TRIAGEM_MAX=1,totalItens=0,totalPassos=0;
 
-/* ===== TRIAGEM (não cronometrada; pontua requisitos) ===== */
-const TRIAGEM=[
-  {id:"exp",label:"Você tem experiência em SAC ou torre de controle de distribuição urbana (last mile)?",
-    op:[["Mais de 1 ano",3],["De 6 meses a 1 ano",2],["Menos de 6 meses",1],["Não tenho",0]]},
-  {id:"app",label:"Qual aplicativo de rastreamento de entregas você já usou no dia a dia?",
-    op:[["GreenMile",3],["Outro app de rastreamento",2],["Nunca usei",0]]},
-  {id:"esl",label:"Você já trabalhou com o ESL?",op:[["Sim",2],["Não",0]]},
-  {id:"bairro",label:"Em qual região você mora?",
-    op:[["Bonsucesso, Pimentas, Pres. Dutra ou arredores",2],["Outro bairro de Guarulhos",1],["Outra cidade",0]]},
-  {id:"sabado",label:"A jornada é de segunda a sábado. Você tem disponibilidade para trabalhar aos sábados?",score:false,
-    op:[["Sim, sem problema",0],["Sim, mas só alguns sábados",0],["Não tenho disponibilidade",0]]},
-  {id:"horario",label:"Qual horário você prefere? (sábado, meio período)",score:false,
-    op:[["07h às 17h",0],["09h às 19h",0],["Tanto faz",0]]}
-];
-const TRIAGEM_MAX=TRIAGEM.filter(t=>t.score!==false).reduce((a,t)=>a+Math.max(...t.op.map(o=>o[1])),0);
-
-/* ===== SEÇÕES CRONOMETRADAS ===== */
-const SECOES=[
-  {id:"tecnico",nome:"Teste Técnico e Prático",eyebrow:"Conhecimento e procedimento do SAC (há resposta correta)",tempo:55,tipo:"mcq",
-   questoes:[
-    {q:"Um veículo está parado há 70 minutos no cliente, sem atualização no app. Sua primeira ação é:",op:[
-      {t:"Abrir a ocorrência no sistema e acompanhar até o motorista atualizar o status pelo app"},
-      {t:"Falar com o motorista agora, entender a causa e avisar o cliente se a janela for afetada",correta:true},
-      {t:"Avisar o cliente do atraso, abrir a ocorrência e depois apurar a causa com o motorista"},
-      {t:"Acionar o gestor da conta para que ele verifique a situação com o motorista"}]},
-    {q:"O motorista precisa fazer uma descarga em rota. O procedimento correto é:",op:[
-      {t:"Orientar o motorista a pagar, guardar o comprovante e confirmar com o cliente no mesmo dia"},
-      {t:"Pedir a autorização ao gestor da conta e lançar o valor na prestação de contas da rota"},
-      {t:"Obter a autorização do cliente antes do pagamento, orientar o motorista e lançar o comprovante no ESL",correta:true},
-      {t:"Registrar a necessidade no GreenMile e seguir a orientação que o motorista receber no local"}]},
-    {q:"Uma reentrega foi acordada com o cliente. Para a operação poder cobrá-la, você precisa:",op:[
-      {t:"Registrar a senha de reentrega no ESL e no GreenMile, vinculada à nota fiscal",correta:true},
-      {t:"Abrir a ocorrência de reentrega no GreenMile com a data acordada e o motivo da primeira tentativa"},
-      {t:"Lançar a reentrega no ESL e anexar o canhoto da tentativa que foi frustrada"},
-      {t:"Encaminhar o e-mail do cliente autorizando a reentrega para a prestação de contas"}]},
-    {q:"Chega um alerta do gerenciamento de risco (desvio de rota). O correto é:",op:[
-      {t:"Ligar para o motorista e confirmar se está tudo bem antes de acionar a gerenciadora"},
-      {t:"Registrar o alerta e acompanhar pelo rastreador até o veículo voltar à rota prevista"},
-      {t:"Acionar o gestor da conta e aguardar a orientação dele para falar com a gerenciadora"},
-      {t:"Tratar em até 5 minutos com a central da gerenciadora e acionar o gestor se houver desvio ou sinistro",correta:true}]},
-    {q:"Entrega frustrada: o ponto de venda estava fechado. Além de reagendar, o que não pode faltar?",op:[
-      {t:"Confirmar o novo horário com o cliente e registrar o reagendamento no GreenMile"},
-      {t:"Registrar a causa da frustração na ocorrência, com o horário da tentativa e a evidência do motorista",correta:true},
-      {t:"Informar a frustração ao gestor da conta no relatório de fechamento do dia"},
-      {t:"Pedir ao motorista que tente de novo no fim da rota antes de registrar a frustração"}]},
-    {q:"Pela regra da operação, o prazo máximo para responder uma mensagem de motorista ou cliente é:",op:[
-      {t:"15 minutos",correta:true},{t:"30 minutos"},{t:"1 hora"},{t:"Até o fim do turno"}]},
-    {q:"Ao terminar o seu turno, antes de sair, você precisa:",op:[
-      {t:"Atualizar o status de todas as entregas no GreenMile e registrar as ocorrências abertas"},
-      {t:"Deixar as pendências registradas no ESL para quem assumir o turno consultar"},
-      {t:"Passar por escrito as entregas ainda em rota e as pendências ao próximo responsável",correta:true},
-      {t:"Avisar o gestor da conta do que ficou pendente e retomar no início do próximo turno"}]}
-   ]},
-  {id:"comportamento",nome:"Comportamento",eyebrow:"O quanto combina com você (não há resposta certa)",tempo:30,tipo:"likert",
-   questoes:[
-    {t:"Escrevo mensagens curtas e objetivas: digo o que houve, o que estou fazendo e quando dou retorno.",dim:"COM"},
-    {t:"Quando algo trava uma entrega, trato na hora — não deixo para depois.",dim:"URG"},
-    {t:"Mantenho a calma com motorista irritado ou cliente cobrando, e foco na solução, não no culpado.",dim:"CONF"},
-    {t:"Costumo agir antes de o problema estourar: ligo para o motorista parado sem ninguém pedir.",dim:"PRO"},
-    {t:"Cobro senha, comprovante e resposta com firmeza e respeito, sem precisar escalar para o chefe.",dim:"COB"},
-    {t:"Nos dias de pico eu perco o ritmo e demoro a me recuperar depois de um erro.",dim:"RES",rev:true},
-    {t:"Registro tudo no sistema no mesmo dia: causa, senha e comprovante.",dim:"REG"}
-   ]},
-  {id:"valores",nome:"Valores no trabalho",eyebrow:"O que mais combina com você (as duas são boas; não há certo)",tempo:25,tipo:"fc",
-   questoes:[
-    {a:{t:"Respondo rápido, mesmo que a mensagem seja curta.",dim:"URG"},b:{t:"Registro tudo com capricho, mesmo que leve mais tempo.",dim:"REG"}},
-    {a:{t:"Me sinto bem quando acalmo um conflito.",dim:"CONF"},b:{t:"Me sinto bem quando antecipo um problema.",dim:"PRO"}},
-    {a:{t:"Insisto até conseguir o retorno do motorista ou do cliente.",dim:"COB"},b:{t:"Mantenho a cabeça fria quando tudo acontece ao mesmo tempo.",dim:"RES"}},
-    {a:{t:"Comunico de forma clara e sem ruído.",dim:"COM"},b:{t:"Trato primeiro o que trava a entrega.",dim:"URG"}}
-   ]}
-];
-const VIDEO={nome:"Entrevista em Áudio",eyebrow:"Resposta gravada em áudio",tempo:75,
-  questoes:["Conte uma situação real em que um cliente ou motorista estava irritado e você resolveu. O que você fez e falou, na prática?",
-            "Num dia de pico, com várias ocorrências ao mesmo tempo, como você se organiza para não deixar nada sem resposta?"]};
+function aplicaVaga(v){
+ VAGA_SLUG=v.slug;
+ VAGA={titulo:v.titulo,local:v.local,jornada:v.jornada,corte:v.corte,
+       lead:v.lead||'',passos:v.passos||[],local_entrevista:v.local_entrevista||''};
+ DIMS=v.dims||{};TRIAGEM=v.triagem||[];SECOES=v.secoes||[];
+ VIDEO=Object.assign({nome:'Entrevista em \u00c1udio',eyebrow:'Resposta gravada em \u00e1udio',tempo:75,questoes:[]},v.audio||{});
+ GESTOR=v.gestor||{};
+ AGENDA=Object.assign({janelas:[],passo:30,duracao:30,dias:5,sabado:false},v.agenda||{});
+ PESOS=Object.assign({triagem:0.20,tecnico:0.45,perfil:0.35},v.pesos||{});
+ const pontuaveis=TRIAGEM.filter(t=>t.score!==false);
+ TRIAGEM_MAX=pontuaveis.reduce((a,t)=>a+Math.max(...t.op.map(o=>o[1])),0)||1;
+ totalItens=SECOES.reduce((a,s)=>a+s.questoes.length,0);
+ totalPassos=1+1+totalItens+VIDEO.questoes.length+1;
+ st.respostas={};SECOES.forEach(s=>st.respostas[s.id]=[]);
+ embaralhaTecnico();
+}
 
 /* ===== ESTADO ===== */
-const st={cand:{},triagem:{},secIdx:0,qIdx:0,respostas:{},videoIdx:0,videoBlobs:[],focoPerdido:0,timer:null,timeLeft:0,screen:""};
-SECOES.forEach(s=>st.respostas[s.id]=[]);
+const st={cand:{},triagem:{},secIdx:0,qIdx:0,respostas:{},videoIdx:0,videoBlobs:[],focoPerdido:0,timer:null,timeLeft:0,screen:"",nota:0};
 const app=document.getElementById('app'),toastEl=document.getElementById('toast');let toastT=null;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('show'),2600);}
-const totalItens=SECOES.reduce((a,s)=>a+s.questoes.length,0);
-const totalPassos=1+1+totalItens+VIDEO.questoes.length+1;
 function setProgress(step,label){document.getElementById('progbar').style.width=Math.min(100,(step/totalPassos)*100)+'%';document.getElementById('stepnote').textContent=label||'';}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&['q','video'].includes(st.screen)){st.focoPerdido++;toast('Saída de tela detectada e registrada.');}});
 function val(id){return document.getElementById(id).value.trim();}
@@ -214,30 +162,34 @@ function formataFone(s){const d=soDigitos(s);if(d.length<=2)return d?'('+d:'';co
 function emailValido(s){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(s);}
 
 /* ===== CONTATO DO RH ===== */
-const RH={zap:"5511947495997",exibe:"(11) 94749-5997",
- msg:"Olá! Estou com dúvida ou dificuldade para preencher o portal do RH da vaga de Assistente de SAC."};
-const RH_URL=`https://wa.me/${RH.zap}?text=${encodeURIComponent(RH.msg)}`;
+const RH={zap:"5511947495997",exibe:"(11) 94749-5997"};
+function rhUrl(){
+ const msg="Olá! Estou com dúvida ou dificuldade para preencher o portal do RH da Mandalog"
+  +(VAGA.titulo?(", na vaga de "+VAGA.titulo):"")+".";
+ return `https://wa.me/${RH.zap}?text=${encodeURIComponent(msg)}`;}
 const ZAP_SVG='<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.5-.6-2.7-1.2-4.4-3.9-4.5-4.1-.1-.2-1.1-1.4-1.1-2.7 0-1.3.7-1.9 1-2.2.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.1.3.6 1.1 1.4 1.8 1 .9 1.8 1.1 2 1.3.3.1.4.1.6-.1l.8-1c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.4.3.1.2.1.6 0 1.2Z"/></svg>';
 function blocoAjuda(){return `<div class="ajuda">
  <div class="txt"><b>Dúvida ou dificuldade para preencher?</b>Fale com o RH da Mandalog no WhatsApp ${RH.exibe}.
-  <a class="zap" href="${RH_URL}" target="_blank" rel="noopener">${ZAP_SVG}Chamar o RH no WhatsApp</a></div>
+  <a class="zap" href="${rhUrl()}" target="_blank" rel="noopener">${ZAP_SVG}Chamar o RH no WhatsApp</a></div>
  <div class="qr"><img src="/qr-rh-whatsapp.svg" alt="QR code do WhatsApp do RH da Mandalog" width="96" height="96" loading="lazy"></div></div>`;}
 
 /* ===== INTRO ===== */
 function screenIntro(){st.screen='intro';setProgress(0,'');
+ const passos=(VAGA.passos.length?VAGA.passos:[
+   {titulo:'Triagem',desc:'Experiência e perfil para a vaga'},
+   {titulo:'Teste técnico e prático',desc:'Situações reais do dia a dia'},
+   {titulo:'Comportamento e valores',desc:'Como você age no dia a dia'},
+   {titulo:'Entrevista em áudio',desc:'Você grava a resposta pelo microfone, na hora'}])
+  .map((p,i)=>`<div class="stepitem"><div class="n">${i+1}</div><div class="d"><b>${p.titulo}</b>${p.desc}</div></div>`).join('');
  app.innerHTML=`<div class="capa"><div class="capa-in">
    <span class="eyebrow-vaga">${VAGA.titulo} · ${VAGA.local} · ${VAGA.jornada}</span>
    <h1>Trabalhe na <em>Mandalog</em></h1>
-   <p class="lead">Você vai acompanhar entregas em rota, tratar ocorrências e manter cliente e motoristas informados — do armazém de Bonsucesso à porta do cliente.</p>
+   <p class="lead">${VAGA.lead}</p>
   </div></div>
   <div class="card">
   <h2 class="q-title" style="margin-bottom:8px">Como é o processo</h2>
   <p class="lead" style="margin-bottom:18px">Esta avaliação é rápida e cronometrada. Só a parte técnica tem resposta certa — o resto mostra o seu jeito de trabalhar.</p>
-  <div class="steps">
-   <div class="stepitem"><div class="n">1</div><div class="d"><b>Triagem</b>Experiência e perfil para a vaga</div></div>
-   <div class="stepitem"><div class="n">2</div><div class="d"><b>Teste técnico e prático</b>Situações reais do SAC</div></div>
-   <div class="stepitem"><div class="n">3</div><div class="d"><b>Comportamento e valores</b>Como você age no dia a dia</div></div>
-   <div class="stepitem"><div class="n">4</div><div class="d"><b>Entrevista em áudio</b>Você grava a resposta pelo microfone, na hora</div></div></div>
+  <div class="steps">${passos}</div>
   <div class="rules"><b>Como funciona:</b><ul>
    <li>Cada pergunta do teste tem <b>tempo limite</b>. Se o tempo acabar, avança sozinho.</li>
    <li>Não dá para voltar para uma pergunta anterior.</li>
@@ -278,17 +230,17 @@ function screenDados(){st.screen='dados';setProgress(0.5,'Seus dados');
    st.cand=cand;marcaParticipacao(cand);screenTriagem();
   }).catch(()=>{st.cand=cand;marcaParticipacao(cand);screenTriagem();});};}
 
-/* ===== TRAVA DE RECANDIDATURA ===== */
-const CHAVE_PART='mdl_rh_participou';
-function participacaoLocal(){try{return JSON.parse(localStorage.getItem(CHAVE_PART)||'null');}catch(e){return null;}}
-function marcaParticipacao(c){try{localStorage.setItem(CHAVE_PART,JSON.stringify({email:c.email,nome:c.nome,data:new Date().toISOString()}));}catch(e){}}
+/* ===== TRAVA DE RECANDIDATURA (por vaga) ===== */
+function chavePart(){return 'mdl_rh_participou_'+VAGA_SLUG;}
+function participacaoLocal(){try{return JSON.parse(localStorage.getItem(chavePart())||'null');}catch(e){return null;}}
+function marcaParticipacao(c){try{localStorage.setItem(chavePart(),JSON.stringify({email:c.email,nome:c.nome,data:new Date().toISOString()}));}catch(e){}}
 async function verificaDuplicado(c){
  const local=participacaoLocal();
  if(local&&local.email&&local.email.toLowerCase()===c.email.toLowerCase())return{ja_participou:true,...local};
  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),6000);
  try{
   const r=await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
-   signal:ctrl.signal,body:JSON.stringify({tipo:'verificar',email:c.email,telefone:c.telefone})});
+   signal:ctrl.signal,body:JSON.stringify({tipo:'verificar',vaga_slug:VAGA_SLUG,vaga:VAGA.titulo,email:c.email,telefone:c.telefone})});
   return await r.json();
  }finally{clearTimeout(t);}
 }
@@ -401,11 +353,11 @@ function radarSVG(prof){const keys=Object.keys(DIMS),N=keys.length,cx=140,cy=140
 function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão');
  const req=calcTriagem(),tec=calcTecnico(),prof=calcPerfil();
  const perf=Math.round(Object.values(prof).reduce((a,b)=>a+b,0)/Object.keys(prof).length);
- const nota=Math.round(0.20*req+0.45*tec.pct+0.35*perf);
+ const nota=Math.round(PESOS.triagem*req+PESOS.tecnico*tec.pct+PESOS.perfil*perf);
  st.nota=nota;
  const aprovado=nota>=VAGA.corte;
  const cls=aprovado?'pri':nota>=70?'rec':'ana',clsL=aprovado?'Acima do corte — agendar entrevista':nota>=70?'Em análise':'Abaixo do corte';
- const payload={vaga:VAGA.titulo,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,audios:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
+ const payload={vaga:VAGA.titulo,vaga_slug:VAGA_SLUG,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,audios:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
  enviarCandidatura(payload);
  const dims=Object.keys(DIMS).map(d=>`<div class="dimrow"><div class="top"><b>${DIMS[d]}</b><span>${prof[d]}%</span></div><div class="bar"><i style="width:${prof[d]}%"></i></div></div>`).join('');
  app.innerHTML=`<div class="card"><div class="eyebrow">Avaliação concluída</div><h2 class="q-title" style="margin-bottom:6px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
@@ -422,13 +374,10 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
  if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Agendar minha entrevista';b.onclick=screenAgenda;cta.appendChild(b);}
  else{cta.innerHTML=`<div class="okbox" style="background:#F1F5F9;border-color:#E2E8F0;color:#475569">Recebemos a sua candidatura. Vamos analisar o seu resultado e, havendo aderência, o RH entra em contato pelo WhatsApp.</div>`;}}
 
-/* ===== AGENDAMENTO (trava real via n8n + Google Calendar) =====
-   Entrevistas das 14h às 16h, de 30 em 30 minutos, em dias úteis. */
-/* Gestor que conduz as entrevistas (convidado do evento no Calendar). */
-const GESTOR={nome:'Rodrigo Freitas',email:'rodrigo.freitas@mandalog.com.br'};
-const AGENDA={janelas:[{nome:'Manhã',inicio:'10:00',fim:'12:00'},
-                       {nome:'Tarde',inicio:'14:00',fim:'16:00'}],
-              passo:30,duracao:30,dias:5,sabado:false};
+/* ===== AGENDAMENTO =====
+   A grade de horários e o gestor vêm da vaga (campos "agenda" e "gestor" do JSON).
+   Não há trava entre candidatos: dois podem escolher o mesmo horário e o RH
+   desempata na confirmação pelo WhatsApp. */
 function horariosDoDia(){const out=[];
  AGENDA.janelas.forEach(j=>{const [hi,mi]=j.inicio.split(':').map(Number),[hf,mf]=j.fim.split(':').map(Number);
   for(let m=hi*60+mi;m<=hf*60+mf;m+=AGENDA.passo){
@@ -440,8 +389,8 @@ function genSlots(){const out=[],horas=horariosDoDia();
   if(wd===0||(wd===6&&!AGENDA.sabado))continue;
   horas.forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h.time,date:new Date(d),time:h.time,periodo:h.periodo}));added++;}
  return out;}
-function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken')||'[]'));}catch(e){return new Set();}}
-function saveTaken(s){try{localStorage.setItem('mdl_slots_taken',JSON.stringify([...s]));}catch(e){}}
+function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken_'+VAGA_SLUG)||'[]'));}catch(e){return new Set();}}
+function saveTaken(s){try{localStorage.setItem('mdl_slots_taken_'+VAGA_SLUG,JSON.stringify([...s]));}catch(e){}}
 function screenAgenda(){st.screen='agenda';
  const slots=genSlots(),taken=takenSet();let sel=null;
  const dias={};slots.forEach(s=>{const k=s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(s);});
@@ -463,7 +412,7 @@ function screenAgenda(){st.screen='agenda';
   // A tela de confirmação vem primeiro: uma falha no envio não pode deixar o
   // candidato preso num botão "Enviando..." sem saber o que aconteceu.
   app.innerHTML=`<div class="card"><div class="eyebrow">Horário reservado</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
-   <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
+   <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>${VAGA.local_entrevista}</div>
    <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
    ${blocoAjuda()}</div>`;
   try{enviarAgendamento(slot,quando,st.nota);}catch(e){}
@@ -473,7 +422,7 @@ function screenAgenda(){st.screen='agenda';
 async function enviarAgendamento(slot,quando,nota){
   try{
     await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({tipo:'agendamento',vaga:VAGA.titulo,nome:st.cand.nome,email:st.cand.email,
+      body:JSON.stringify({tipo:'agendamento',vaga:VAGA.titulo,vaga_slug:VAGA_SLUG,nome:st.cand.nome,email:st.cand.email,
         telefone:st.cand.telefone,cidade:st.cand.cidade,bairro:st.cand.bairro,
         nota_final:nota,gestor:GESTOR.nome,gestor_email:GESTOR.email,
         slot_id:slot.id,entrevista_iso:slot.date.toISOString().slice(0,10)+'T'+slot.time+':00',
@@ -493,12 +442,67 @@ async function enviarCandidatura(base){
 
 /* Embaralha as alternativas do teste técnico uma vez por candidato, para a posição
    da resposta certa não virar padrão entre quem faz a prova. */
-(function embaralhaTecnico(){
+function embaralhaTecnico(){
  const sec=SECOES.find(s=>s.tipo==='mcq');if(!sec)return;
  sec.questoes.forEach(q=>{for(let i=q.op.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[q.op[i],q.op[j]]=[q.op[j],q.op[i]];}});
-})();
+}
 
-screenIntro();
+/* ===== ROTEADOR DE VAGAS =====
+   /            -> lista as vagas abertas
+   /?vaga=slug  -> abre o portal daquela vaga
+   Vaga encerrada ou inexistente cai numa tela explicando, com as abertas do lado. */
+
+function cartaoVaga(v){
+ return `<a class="vagacard" href="/?vaga=${encodeURIComponent(v.slug)}">
+   <b>${v.titulo}</b>
+   <span class="meta">${[v.local,v.jornada].filter(Boolean).join(' · ')}</span>
+   ${v.resumo?`<span class="res">${v.resumo}</span>`:''}
+   <span class="cta">Quero me candidatar →</span></a>`;}
+
+function telaVagas(lista,aviso){
+ st.screen='vagas';setProgress(0,'');
+ const abertas=(lista||[]).filter(v=>v.status==='aberta');
+ app.innerHTML=`<div class="capa"><div class="capa-in">
+   <span class="eyebrow-vaga">Vagas abertas</span>
+   <h1>Trabalhe na <em>Mandalog</em></h1>
+   <p class="lead">Escolha a vaga que combina com você. A avaliação é feita aqui mesmo, pelo celular ou pelo computador, e leva cerca de 15 minutos.</p>
+  </div></div>
+  <div class="card">
+   ${aviso?`<div class="okbox" style="background:#FEF2F2;border-color:#FECACA;color:#991B1B;margin-bottom:16px">${aviso}</div>`:''}
+   ${abertas.length
+     ? `<h2 class="q-title" style="margin-bottom:16px">${abertas.length===1?'1 vaga aberta':abertas.length+' vagas abertas'}</h2>${abertas.map(cartaoVaga).join('')}`
+     : `<h2 class="q-title" style="margin-bottom:8px">Nenhuma vaga aberta no momento</h2>
+        <p class="lead">Assim que abrirmos uma nova posição ela aparece aqui. Se quiser deixar seu currículo com a gente, fale com o RH:</p>`}
+   ${blocoAjuda()}</div>`;}
+
+function telaEncerrada(meta,lista){
+ st.screen='encerrada';setProgress(0,'');
+ const abertas=(lista||[]).filter(v=>v.status==='aberta');
+ app.innerHTML=`<div class="card">
+   <div class="eyebrow">Vaga encerrada</div>
+   <h2 class="q-title" style="margin-bottom:10px">${meta.titulo}</h2>
+   <p class="lead">Essa vaga já foi preenchida e não está mais recebendo candidaturas. Obrigado pelo interesse na Mandalog!</p>
+   ${abertas.length?`<h3 style="font-size:15px;color:var(--navy);margin:24px 0 12px">Outras vagas abertas</h3>${abertas.map(cartaoVaga).join('')}`:''}
+   ${blocoAjuda()}</div>`;}
+
+async function boot(){
+ const slug=(new URLSearchParams(location.search).get('vaga')||'').trim();
+ let lista=[];
+ try{lista=await (await fetch('/vagas/index.json',{cache:'no-store'})).json();}catch(e){lista=[];}
+ if(!slug)return telaVagas(lista);
+ if(!/^[a-z0-9-]{1,40}$/.test(slug))return telaVagas(lista,'Não encontramos essa vaga.');
+ const meta=(lista||[]).find(v=>v.slug===slug);
+ if(meta&&meta.status!=='aberta')return telaEncerrada(meta,lista);
+ let v=null;
+ try{const r=await fetch('/vagas/'+slug+'.json',{cache:'no-store'});if(r.ok)v=await r.json();}catch(e){}
+ if(!v||!v.titulo)return telaVagas(lista,'Não encontramos essa vaga. Veja as que estão abertas:');
+ if(v.status&&v.status!=='aberta')return telaEncerrada(v,lista);
+ aplicaVaga(v);
+ document.title=v.titulo+' — Mandalog';
+ screenIntro();
+}
+
+boot();
 </script>
 </body>
 </html>
