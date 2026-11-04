@@ -402,6 +402,7 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
  const req=calcTriagem(),tec=calcTecnico(),prof=calcPerfil();
  const perf=Math.round(Object.values(prof).reduce((a,b)=>a+b,0)/Object.keys(prof).length);
  const nota=Math.round(0.20*req+0.45*tec.pct+0.35*perf);
+ st.nota=nota;
  const aprovado=nota>=VAGA.corte;
  const cls=aprovado?'pri':nota>=70?'rec':'ana',clsL=aprovado?'Acima do corte — agendar entrevista':nota>=70?'Em análise':'Abaixo do corte';
  const payload={vaga:VAGA.titulo,...st.cand,triagem:st.triagem,nota_final:nota,req_pct:req,tecnico_pct:tec.pct,perfil:prof,perfil_pct:perf,audios:st.videoBlobs.length,foco_perdido:st.focoPerdido,status:aprovado?"AGENDAR_ENTREVISTA":"EM_ANALISE",data:new Date().toISOString()};
@@ -445,13 +446,12 @@ function screenAgenda(){st.screen='agenda';
  const slots=genSlots(),taken=takenSet();let sel=null;
  const dias={};slots.forEach(s=>{const k=s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(s);});
  let html=`<div class="card"><div class="eyebrow">Você passou do corte 🎉</div><h2 class="q-title" style="margin-bottom:8px">Agende sua entrevista com um gestor</h2>
-  <p class="small" style="margin-bottom:6px">Escolha um horário livre. Cada horário recebe <b>uma única entrevista</b> — ao reservar, ele fica indisponível para os demais candidatos.</p>`;
+  <p class="small" style="margin-bottom:6px">Escolha o horário que for melhor para você. O RH confirma pelo WhatsApp — se outro candidato já tiver pegado esse horário, a gente combina outro com você.</p>`;
  Object.entries(dias).forEach(([dia,ss])=>{html+=`<div class="slotday">${dia}</div>`;
   const pers={};ss.forEach(s=>{(pers[s.periodo]=pers[s.periodo]||[]).push(s);});
   Object.entries(pers).forEach(([per,ps])=>{html+=`<div class="slotper">${per}</div><div class="slots">`
    +ps.map(s=>{const t=taken.has(s.id);return `<div class="slot ${t?'taken':''}" data-id="${s.id}">${s.time}</div>`;}).join('')+`</div>`;});});
- html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Confirmar horário</button></div>
-  <p class="small" style="margin-top:12px">Protótipo: a reserva fica gravada neste navegador. Em produção, a trava entre todos os candidatos é feita pelo n8n na agenda real dos gestores (Google Calendar), impossibilitando dois agendamentos no mesmo horário.</p></div>`;
+ html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Confirmar horário</button></div></div>`;
  app.innerHTML=html;
  const conf=document.getElementById('conf');
  [...document.querySelectorAll('.slot:not(.taken)')].forEach(el=>el.onclick=()=>{sel=el.dataset.id;document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');conf.disabled=false;});
@@ -460,11 +460,14 @@ function screenAgenda(){st.screen='agenda';
   conf.disabled=true;conf.textContent='Enviando...';
   const slot=genSlots().find(s=>s.id===sel);
   const quando=slot.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+slot.time;
-  enviarAgendamento(slot,quando,nota);
+  // A tela de confirmação vem primeiro: uma falha no envio não pode deixar o
+  // candidato preso num botão "Enviando..." sem saber o que aconteceu.
   app.innerHTML=`<div class="card"><div class="eyebrow">Horário reservado</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
    <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>Local: Posto avançado — GLP Bonsucesso, Guarulhos</div>
-   <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou, com o convite da agenda e o link da chamada. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
-   ${blocoAjuda()}</div>`;};}
+   <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
+   ${blocoAjuda()}</div>`;
+  try{enviarAgendamento(slot,quando,st.nota);}catch(e){}
+ };}
 
 /* Manda o horário escolhido para o n8n (mesmo endpoint, tipo diferente) */
 async function enviarAgendamento(slot,quando,nota){

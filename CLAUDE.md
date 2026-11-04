@@ -107,6 +107,13 @@ Usuários novos: `node scripts/gerar-senha.mjs "email" "Nome" rh|gestor`.
     na mão. As colunas `entrevista_gestor`, `meet_link` e `evento_id` existem na planilha
     e ficam vazias. Se um dia isso incomodar, dá para travar lendo os `entrevista_em` já
     ocupados na planilha, sem precisar de Calendar.
+  - **Bug corrigido em 04/11:** `screenAgenda` chamava `enviarAgendamento(...,nota)`, mas
+    `nota` só existia dentro de `screenResultado`. Dava `ReferenceError` no clique em
+    "Confirmar horário": o POST nunca saía, o botão travava em "Enviando..." e o candidato
+    ficava na mesma tela. Pegou o único aprovado da vaga de SAC (nota 87, 06/10), cujo
+    `entrevista_em` ficou vazio. Agora a nota vai em `st.nota`, a tela de confirmação é
+    desenhada **antes** do envio e o envio é best-effort. A tela também não promete mais
+    exclusividade de horário, que nunca existiu.
 
 - **Trava de recandidatura** ✅ FEITO: antes de iniciar a avaliação o portal chama
   `tipo=verificar`, que busca o e-mail **ou** o WhatsApp na planilha e responde
