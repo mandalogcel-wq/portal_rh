@@ -92,11 +92,18 @@ Usuários novos: `node scripts/gerar-senha.mjs "email" "Nome" rh|gestor`.
   (`18LlMKV4-6q6nq5ZxMT5eGW-sl_xqGpJc`) e grava o link em `link_audios`. Folga grande
   no limite de 4,5MB da função; se um dia voltar a ser vídeo, aí sim precisa de Vercel Blob.
 - **Agenda de entrevistas — ESCOPO FECHADO (sem Google Calendar).** O Marcus decidiu
-  não usar o Google Calendar: o aviso no grupo do WhatsApp basta. O que está no ar:
-  - O portal envia o horário escolhido (`tipo=agendamento`, mesmo endpoint
+  não usar o Google Calendar: o aviso no grupo do WhatsApp basta.
+  **Desde 05/11 o candidato não agenda: ele sugere 3 horários** (`screenHorarios`),
+  na ordem de preferência, e o RH escolhe um e confirma pelo WhatsApp. Isso casa com
+  a realidade de não haver trava: não se promete mais um horário que ninguém reservou.
+  O envio leva `horarios` (lista estruturada: ordem, slot_id, iso, texto) e
+  `entrevista_em` com os três juntos (`1ª: ... · 2ª: ... · 3ª: ...`), que é o que vai
+  para a planilha e para o aviso no grupo sem precisar mexer no n8n. O painel mostra
+  os três, um por linha. O que está no ar:
+  - O portal envia os horários sugeridos (`tipo=agendamento`, mesmo endpoint
     `/api/candidatura`, com nota, gestor, cidade e bairro). Um IF no início do workflow
     separa os três tipos de envio (verificar / agendamento / candidatura).
-  - O horário vai para a coluna `entrevista_em` da linha do candidato.
+  - Os horários vão para a coluna `entrevista_em` da linha do candidato.
   - O n8n posta no grupo **Reestruturação 3C - GRU** (`120363430026918823-group`) via
     **Z-API**, instância "Supley" (`3F433452...`), Client-Token na credencial
     **"Header Auth account"** (`UitEFSpGVNbn30ZQ`), header `Client-Token`. O número da

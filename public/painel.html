@@ -213,7 +213,7 @@ function telaPainel(){
  const aptos=st.candidatos.filter(c=>c.aprovado).length;
  const agendados=st.candidatos.filter(c=>String(c.entrevista_em||'').trim()).length;
  const media=total?Math.round(st.candidatos.reduce((a,c)=>a+c.nota,0)/total):0;
- const chips=[['todos','Todos'],['entrevistar','A entrevistar'],['agendados','Com horário'],['analise','Em análise']];
+ const chips=[['todos','Todos'],['entrevistar','A entrevistar'],['agendados','Com horários'],['analise','Em análise']];
 
  app.innerHTML=`
  <div class="topbar"><div class="topbar-inner">
@@ -225,7 +225,7 @@ function telaPainel(){
   <div class="kpis">
    <div class="kpi"><b>${total}</b><span>candidatos</span></div>
    <div class="kpi dest"><b>${aptos}</b><span>acima do corte (${CORTE})</span></div>
-   <div class="kpi"><b>${agendados}</b><span>com horário escolhido</span></div>
+   <div class="kpi"><b>${agendados}</b><span>sugeriram horários</span></div>
    <div class="kpi"><b>${media}</b><span>nota média</span></div>
   </div>
   <div class="filtros">
@@ -261,7 +261,7 @@ function desenhaLista(){
   const cls=c.nota>=CORTE?'alta':c.nota>=70?'media':'baixa';
   const tags=[];
   if(c.aprovado)tags.push('<span class="tag ok">acima do corte</span>');
-  if(String(c.entrevista_em||'').trim())tags.push(`<span class="tag agenda">${esc(c.entrevista_em)}</span>`);
+  if(String(c.entrevista_em||'').trim())tags.push('<span class="tag agenda">sugeriu horários</span>');
   if(c.temIA)tags.push('<span class="tag ia">análise da IA</span>');
   if(String(c.indicado||'').toLowerCase().startsWith('s'))tags.push('<span class="tag">indicação</span>');
   if(num(c.foco_perdido)>2)tags.push(`<span class="tag alerta">saiu da tela ${num(c.foco_perdido)}x</span>`);
@@ -346,9 +346,10 @@ function abre(c){
       <div class="acoes">${c.audios.map((l,i)=>`<a class="btn ghost sm" href="${esc(l)}" target="_blank" rel="noopener">Áudio ${i+1}</a>`).join('')}</div>`
      :`<p class="small" style="margin:0">Sem áudio — o candidato não liberou o microfone ou a gravação falhou.</p>`}</div>
    <div class="bloco"><h3>Entrevista presencial</h3>
-    ${par('Horário escolhido pelo candidato',esc(c.entrevista_em)||'não escolheu')}
+    ${par('Horários sugeridos pelo candidato',
+      String(c.entrevista_em||'').split(' · ').map(h=>h.trim()).filter(Boolean).map(esc).join('<br>')||'não sugeriu')}
     ${par('Gestor',esc(c.entrevista_gestor)||'Rodrigo Freitas')}
-    <p class="small" style="margin:12px 0 0">O horário é a preferência do candidato — a confirmação sai pelo WhatsApp do RH. Dois candidatos podem ter escolhido o mesmo horário.</p></div>
+    <p class="small" style="margin:12px 0 0">São as três preferências do candidato, na ordem em que ele marcou. Escolha uma e confirme com ele pelo WhatsApp.</p></div>
   </div></div>`;
 
  const fecha=()=>{fundo.remove();st.aberto=null;document.body.style.overflow='';document.removeEventListener('keydown',esq);};

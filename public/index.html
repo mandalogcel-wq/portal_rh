@@ -111,8 +111,9 @@ input.f:focus,select.f:focus{outline:none;border-color:var(--orange)}
 .slotday{margin:18px 0 2px;font-family:'Outfit';font-weight:700;color:var(--navy);font-size:14px}
 .slotper{margin:8px 0 5px;font-size:11.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
 .slots{display:flex;flex-wrap:wrap;gap:9px}
-.slot{border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;font-family:'Outfit';font-weight:600;color:var(--navy);cursor:pointer;background:#fff;font-size:14px;transition:.15s}
+.slot{position:relative;border:1.5px solid var(--line);border-radius:11px;padding:11px 15px;font-family:'Outfit';font-weight:600;color:var(--navy);cursor:pointer;background:#fff;font-size:14px;transition:.15s}
 .slot:hover{border-color:var(--orange)}.slot.sel{background:var(--orange);color:#fff;border-color:var(--orange)}
+.slot.sel::after{content:attr(data-ordem);position:absolute;top:-7px;right:-7px;background:var(--navy);color:#fff;font-size:10px;font-weight:700;line-height:1;padding:4px 5px;border-radius:99px;border:2px solid var(--bg)}
 .slot.taken{opacity:.4;text-decoration:line-through;cursor:not-allowed}
 .okbox{background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:16px;color:#065F46;font-size:14.5px}
 .okbox b{font-family:'Outfit'}
@@ -371,7 +372,7 @@ function screenResultado(){st.screen='fim';setProgress(totalPassos,'Conclusão')
   <div class="btn-row" id="cta"></div>
   <details style="margin-top:18px"><summary class="small" style="cursor:pointer">Ver dados que vão para o RH (n8n)</summary><div class="payload">${JSON.stringify(payload,null,2)}</div></details>${blocoAjuda()}</div>`;
  const cta=document.getElementById('cta');
- if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Agendar minha entrevista';b.onclick=screenAgenda;cta.appendChild(b);}
+ if(aprovado){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='Sugerir horários para a entrevista';b.onclick=screenHorarios;cta.appendChild(b);}
  else{cta.innerHTML=`<div class="okbox" style="background:#F1F5F9;border-color:#E2E8F0;color:#475569">Recebemos a sua candidatura. Vamos analisar o seu resultado e, havendo aderência, o RH entra em contato pelo WhatsApp.</div>`;}}
 
 /* ===== AGENDAMENTO =====
@@ -389,44 +390,72 @@ function genSlots(){const out=[],horas=horariosDoDia();
   if(wd===0||(wd===6&&!AGENDA.sabado))continue;
   horas.forEach(h=>out.push({id:d.toISOString().slice(0,10)+'_'+h.time,date:new Date(d),time:h.time,periodo:h.periodo}));added++;}
  return out;}
-function takenSet(){try{return new Set(JSON.parse(localStorage.getItem('mdl_slots_taken_'+VAGA_SLUG)||'[]'));}catch(e){return new Set();}}
-function saveTaken(s){try{localStorage.setItem('mdl_slots_taken_'+VAGA_SLUG,JSON.stringify([...s]));}catch(e){}}
-function screenAgenda(){st.screen='agenda';
- const slots=genSlots(),taken=takenSet();let sel=null;
+const QTD_SUGESTOES=3;
+function rotuloSlot(s){return s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+s.time;}
+
+function screenHorarios(){st.screen='horarios';
+ const slots=genSlots();let sel=[];
  const dias={};slots.forEach(s=>{const k=s.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(s);});
- let html=`<div class="card"><div class="eyebrow">Você passou do corte 🎉</div><h2 class="q-title" style="margin-bottom:8px">Agende sua entrevista com um gestor</h2>
-  <p class="small" style="margin-bottom:6px">Escolha o horário que for melhor para você. O RH confirma pelo WhatsApp — se outro candidato já tiver pegado esse horário, a gente combina outro com você.</p>`;
+ let html=`<div class="card"><div class="eyebrow">Você passou do corte 🎉</div><h2 class="q-title" style="margin-bottom:8px">Sugira 3 horários para a entrevista</h2>
+  <p class="small" style="margin-bottom:6px">Marque <b>três horários</b> em que você consegue vir, na ordem da sua preferência. O RH escolhe um deles e confirma pelo WhatsApp.</p>
+  <p class="small" id="contador" style="margin-bottom:6px;font-weight:600;color:var(--orange)">Nenhum horário marcado ainda.</p>`;
  Object.entries(dias).forEach(([dia,ss])=>{html+=`<div class="slotday">${dia}</div>`;
   const pers={};ss.forEach(s=>{(pers[s.periodo]=pers[s.periodo]||[]).push(s);});
   Object.entries(pers).forEach(([per,ps])=>{html+=`<div class="slotper">${per}</div><div class="slots">`
-   +ps.map(s=>{const t=taken.has(s.id);return `<div class="slot ${t?'taken':''}" data-id="${s.id}">${s.time}</div>`;}).join('')+`</div>`;});});
- html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Confirmar horário</button></div></div>`;
+   +ps.map(s=>`<div class="slot" data-id="${s.id}">${s.time}</div>`).join('')+`</div>`;});});
+ html+=`<div class="btn-row"><button class="btn btn-primary" id="conf" disabled>Enviar meus horários</button></div></div>`;
  app.innerHTML=html;
- const conf=document.getElementById('conf');
- [...document.querySelectorAll('.slot:not(.taken)')].forEach(el=>el.onclick=()=>{sel=el.dataset.id;document.querySelectorAll('.slot').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');conf.disabled=false;});
- conf.onclick=()=>{if(!sel)return;const taken=takenSet();if(taken.has(sel)){toast('Esse horário acabou de ser reservado. Escolha outro.');screenAgenda();return;}
-  taken.add(sel);saveTaken(taken);
+
+ const conf=document.getElementById('conf'),contador=document.getElementById('contador');
+ function pinta(){
+  document.querySelectorAll('.slot').forEach(el=>{
+   const i=sel.indexOf(el.dataset.id);
+   el.classList.toggle('sel',i>=0);
+   el.dataset.ordem=i>=0?(i+1)+'ª':'';
+  });
+  const faltam=QTD_SUGESTOES-sel.length;
+  contador.textContent=faltam>0
+   ?(sel.length===0?'Nenhum horário marcado ainda — marque 3.':`Faltam ${faltam} ${faltam===1?'horário':'horários'}.`)
+   :'Três horários marcados. Pode enviar.';
+  conf.disabled=sel.length!==QTD_SUGESTOES;
+ }
+ document.querySelectorAll('.slot').forEach(el=>el.onclick=()=>{
+  const id=el.dataset.id,i=sel.indexOf(id);
+  if(i>=0)sel.splice(i,1);
+  else if(sel.length>=QTD_SUGESTOES){toast('Você já marcou 3 horários. Desmarque um para trocar.');return;}
+  else sel.push(id);
+  pinta();
+ });
+ pinta();
+
+ conf.onclick=()=>{
+  if(sel.length!==QTD_SUGESTOES)return;
   conf.disabled=true;conf.textContent='Enviando...';
-  const slot=genSlots().find(s=>s.id===sel);
-  const quando=slot.date.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'})+' às '+slot.time;
+  const todos=genSlots();
+  const escolhidos=sel.map(id=>todos.find(s=>s.id===id)).filter(Boolean);
+  const rotulos=escolhidos.map(rotuloSlot);
   // A tela de confirmação vem primeiro: uma falha no envio não pode deixar o
   // candidato preso num botão "Enviando..." sem saber o que aconteceu.
-  app.innerHTML=`<div class="card"><div class="eyebrow">Horário reservado</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
-   <div class="okbox"><b>Sua preferência de horário</b><br>${quando}<br>${VAGA.local_entrevista}</div>
-   <p class="small" style="margin-top:16px">O RH vai <b>confirmar a entrevista pelo WhatsApp</b> no número que você cadastrou. Se precisar remarcar ou não receber a confirmação em até 1 dia útil, fale com a gente:</p>
+  app.innerHTML=`<div class="card"><div class="eyebrow">Horários enviados</div><h2 class="q-title" style="margin-bottom:14px">Obrigado, ${st.cand.nome.split(' ')[0]}!</h2>
+   <div class="okbox"><b>Os horários que você sugeriu</b><br>${rotulos.map((r,i)=>`${i+1}ª opção — ${r}`).join('<br>')}<br><br>Local: ${VAGA.local_entrevista}</div>
+   <p class="small" style="margin-top:16px">O RH vai escolher um desses horários e <b>confirmar pelo WhatsApp</b> no número que você cadastrou. Se não receber a confirmação em até 1 dia útil, fale com a gente:</p>
    ${blocoAjuda()}</div>`;
-  try{enviarAgendamento(slot,quando,st.nota);}catch(e){}
+  try{enviarHorarios(escolhidos,rotulos,st.nota);}catch(e){}
  };}
 
-/* Manda o horário escolhido para o n8n (mesmo endpoint, tipo diferente) */
-async function enviarAgendamento(slot,quando,nota){
+/* Manda as 3 sugestões de horário para o n8n (mesmo endpoint, tipo diferente).
+   entrevista_em vai com os três juntos para a planilha e para o aviso no grupo;
+   horarios leva a lista estruturada, para quando o n8n souber usá-la. */
+async function enviarHorarios(escolhidos,rotulos,nota){
   try{
     await fetch('/api/candidatura',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({tipo:'agendamento',vaga:VAGA.titulo,vaga_slug:VAGA_SLUG,nome:st.cand.nome,email:st.cand.email,
         telefone:st.cand.telefone,cidade:st.cand.cidade,bairro:st.cand.bairro,
         nota_final:nota,gestor:GESTOR.nome,gestor_email:GESTOR.email,
-        slot_id:slot.id,entrevista_iso:slot.date.toISOString().slice(0,10)+'T'+slot.time+':00',
-        entrevista_em:quando,data:new Date().toISOString()})});
+        horarios:escolhidos.map((s,i)=>({ordem:i+1,slot_id:s.id,
+          iso:s.date.toISOString().slice(0,10)+'T'+s.time+':00',texto:rotulos[i]})),
+        entrevista_em:rotulos.map((r,i)=>`${i+1}ª: ${r}`).join(' · '),
+        data:new Date().toISOString()})});
   }catch(e){ /* best-effort */ }
 }
 
