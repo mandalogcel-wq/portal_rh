@@ -60,9 +60,8 @@
         },
         "sheetName": {
           "__rl": true,
-          "mode": "list",
-          "value": "861874780",
-          "cachedResultName": "Candidatos"
+          "mode": "name",
+          "value": "={{ $('Config da Vaga').first().json.cfg.aba }}"
         },
         "filtersUI": {
           "values": [
@@ -169,9 +168,8 @@
         },
         "sheetName": {
           "__rl": true,
-          "mode": "list",
-          "value": "861874780",
-          "cachedResultName": "Candidatos"
+          "mode": "name",
+          "value": "={{ $('Config da Vaga').first().json.cfg.aba }}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -410,9 +408,8 @@
         },
         "sheetName": {
           "__rl": true,
-          "mode": "list",
-          "value": "861874780",
-          "cachedResultName": "Candidatos"
+          "mode": "name",
+          "value": "={{ $('Config da Vaga').first().json.cfg.aba }}"
         },
         "columns": {
           "mappingMode": "autoMapInputData",
@@ -802,6 +799,20 @@
       "parameters": {
         "jsCode": "const base = $('Montar Prompt da IA').first().json.linha || {};\n\nlet txt = '';\ntry {\n  const blocos = $json.content || [];\n  for (const b of blocos) { if (b && b.type === 'text' && b.text) txt += b.text; }\n} catch (e) { txt = ''; }\n\nlet a = {};\nif (txt) {\n  const i = txt.indexOf('{');\n  const f = txt.lastIndexOf('}');\n  if (i >= 0 && f > i) { try { a = JSON.parse(txt.slice(i, f + 1)); } catch (e) { a = {}; } }\n}\n\nconst junta = (v) => Array.isArray(v) ? v.filter(Boolean).join(' · ') : (v || '');\n\nreturn [{ json: Object.assign({}, base, {\n  analise_ia: a.resumo || '',\n  fortes_ia: junta(a.fortes),\n  atencao_ia: junta(a.atencao),\n  perguntas_ia: junta(a.perguntas)\n}) }];"
       }
+    },
+    {
+      "id": "cfg-vaga",
+      "name": "Config da Vaga",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        480
+      ],
+      "notes": "Mapa de cada vaga: aba da planilha, grupo do WhatsApp, descricao do cargo para a IA e como triagem e competencias viram colunas. Para abrir uma vaga nova, acrescente uma entrada aqui.",
+      "parameters": {
+        "jsCode": "const b = ($json.body || $json) || {};\nconst slug = String(b.vaga_slug || '').trim() || 'sac';\n\nconst VAGAS = {\n  sac: {\n    aba: 'Candidatos',\n    grupo: '120363430026918823-group',\n    cargo: 'Assistente de SAC — Monitoramento de Entregas (torre de controle de entregas), em Bonsucesso, Guarulhos/SP, com jornada de segunda a sábado.',\n    corte: 85,\n    pesos: '20% triagem de requisitos, 45% teste técnico de procedimento de SAC e 35% aderência de perfil',\n    triagem: { exp: 'experiencia', app: 'app_rastreamento', esl: 'esl', bairro: 'regiao', horario: 'horario_pref' },\n    perfil: { COM: 'comunicacao', URG: 'senso_urgencia', CONF: 'gestao_conflitos', PRO: 'proatividade', COB: 'cobranca_influencia', RES: 'resiliencia', REG: 'registro' }\n  },\n  controladoria: {\n    aba: 'Controladoria',\n    grupo: '120363430026918823-group',\n    cargo: 'Analista de Controladoria Pleno, na área Financeira, em Guarulhos/SP: conferência de fretes contra tabela, custos operacionais, faturamento de CT-e, MDF-e e faturas, conciliação bancária, margem por operação e rota, e gestão da inadimplência.',\n    corte: 70,\n    pesos: '30% triagem de requisitos, 35% teste técnico e 35% aderência de perfil',\n    triagem: { exp: 'experiencia', frete: 'conferencia_frete', fiscal: 'documentos_fiscais', excel: 'excel', sistema: 'sistema_gestao', cobranca: 'cobranca' },\n    perfil: { ANA: 'analise_critica', ORG: 'organizacao_detalhe', PRO: 'proatividade', PRI: 'priorizacao', COM: 'comunicacao_firme' }\n  }\n};\n\nconst cfg = VAGAS[slug] || VAGAS.sac;\nreturn [{ json: { body: b, cfg: Object.assign({ slug: slug }, cfg) } }];"
+      }
     }
   ],
   "connections": {
@@ -809,7 +820,7 @@
       "main": [
         [
           {
-            "node": "E Verificacao?",
+            "node": "Config da Vaga",
             "type": "main",
             "index": 0
           }
@@ -1007,6 +1018,17 @@
         [
           {
             "node": "Gravar na Planilha de Candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config da Vaga": {
+      "main": [
+        [
+          {
+            "node": "E Verificacao?",
             "type": "main",
             "index": 0
           }

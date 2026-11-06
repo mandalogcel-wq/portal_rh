@@ -71,6 +71,13 @@ async function login(req, res) {
   return res.status(200).json({ ok: true, usuario });
 }
 
+// O n8n é quem traduz o slug da vaga para a aba da planilha. Aqui só se garante
+// que o slug tem forma de slug, para não virar um valor arbitrário lá dentro.
+function vagaPedida(req) {
+  const v = String((req.body && req.body.vaga) || '').trim();
+  return /^[a-z0-9-]{1,40}$/.test(v) ? v : 'sac';
+}
+
 async function lista(req, res, sessao) {
   const webhook = process.env.N8N_WEBHOOK_PAINEL;
   const token = process.env.N8N_PAINEL_TOKEN;
@@ -85,7 +92,7 @@ async function lista(req, res, sessao) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Painel-Token': token },
       signal: ctrl.signal,
-      body: JSON.stringify({ acao: 'lista', por: sessao.email }),
+      body: JSON.stringify({ acao: 'lista', vaga: vagaPedida(req), por: sessao.email }),
     });
     if (!r.ok) {
       console.error('Painel — n8n respondeu', r.status);

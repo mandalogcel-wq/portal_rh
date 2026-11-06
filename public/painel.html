@@ -21,6 +21,8 @@ a{color:var(--orange)}
 .topbar .quem b{color:#E8EDF5;font-weight:600}
 .linkbtn{background:none;border:0;color:#92A3BC;font:inherit;font-size:12.5px;cursor:pointer;text-decoration:underline;padding:0}
 .linkbtn:hover{color:#fff}
+.selvaga{width:auto;flex:0 1 auto;max-width:340px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#E8EDF5;padding:7px 11px;font-size:13px;border-radius:9px}
+.selvaga option{color:#1B2A4A;background:#fff}
 .wrap{max-width:1120px;margin:0 auto;padding:22px 18px 72px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:var(--shadow)}
 .eyebrow{font-size:12.5px;color:var(--orange);font-weight:600;margin-bottom:10px}
@@ -105,10 +107,28 @@ input:focus,select:focus{outline:none;border-color:var(--orange)}
 <div id="app"></div>
 
 <script>
-const DIMS={comunicacao:"Comunicação clara",senso_urgencia:"Senso de urgência",gestao_conflitos:"Gestão de conflitos",proatividade:"Proatividade",cobranca_influencia:"Cobrança e influência",resiliencia:"Resiliência",registro:"Capricho no registro"};
-const CORTE=85;
+/* As competências, os itens de triagem e o corte mudam de vaga para vaga:
+   tudo isso vem de /vagas/<slug>.json, o mesmo arquivo que o portal usa. */
+let DIMS={},TRIAGEM_COLS={},CORTE=85;
 const app=document.getElementById('app');
-let st={usuario:null,candidatos:[],filtro:'todos',busca:'',ordem:'nota',aberto:null};
+let st={usuario:null,candidatos:[],filtro:'todos',busca:'',ordem:'nota',aberto:null,
+        vagas:[],vaga:null};
+
+async function carregaVagas(){
+ let lista=[];
+ try{lista=await (await fetch('/vagas/index.json',{cache:'no-store'})).json();}catch(e){lista=[];}
+ if(!Array.isArray(lista)||!lista.length)lista=[{slug:'sac',titulo:'Assistente de SAC'}];
+ st.vagas=lista;
+ if(!st.vaga||!lista.some(v=>v.slug===st.vaga))st.vaga=lista[0].slug;
+ return lista;
+}
+
+async function carregaConfigVaga(slug){
+ try{
+  const v=await (await fetch('/vagas/'+slug+'.json',{cache:'no-store'})).json();
+  DIMS=v.colunas_perfil||{};TRIAGEM_COLS=v.colunas_triagem||{};CORTE=v.corte||85;
+ }catch(e){DIMS={};TRIAGEM_COLS={};CORTE=85;}
+}
 
 /* ===== util ===== */
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -172,7 +192,9 @@ function telaLogin(aviso){
 async function carrega(){
  app.innerHTML=`<div class="wrap"><div class="vazio">Carregando candidatos…</div></div>`;
  try{
-  const d=await api('lista');
+  await carregaVagas();
+  await carregaConfigVaga(st.vaga);
+  const d=await api('lista',{vaga:st.vaga});
   st.usuario=d.usuario||st.usuario;
   st.candidatos=(d.candidatos||[]).map(normaliza).sort((a,b)=>b.nota-a.nota);
   // O gestor abre direto na lista de quem precisa ser entrevistado.
@@ -218,7 +240,9 @@ function telaPainel(){
  app.innerHTML=`
  <div class="topbar"><div class="topbar-inner">
    <img src="/logo-mandalog-branco.png" alt="Mandalog">
-   <div class="quem"><span>Painel de candidatos · <b>${esc(u.nome)}</b> (${u.papel==='gestor'?'gestor':'RH'})</span>
+   <select id="selvaga" class="selvaga">${st.vagas.map(v=>
+     `<option value="${esc(v.slug)}"${v.slug===st.vaga?' selected':''}>${esc(v.titulo)}${v.status==='encerrada'?' (encerrada)':''}</option>`).join('')}</select>
+   <div class="quem"><span><b>${esc(u.nome)}</b> (${u.papel==='gestor'?'gestor':'RH'})</span>
     <button class="linkbtn" id="sair">sair</button></div>
  </div></div>
  <div class="wrap">
@@ -240,6 +264,8 @@ function telaPainel(){
   <div class="lista" id="lista"></div>
  </div>`;
 
+ const selv=document.getElementById('selvaga');
+ if(selv)selv.onchange=async()=>{st.vaga=selv.value;st.busca='';st.filtro='todos';await carrega();};
  document.getElementById('sair').onclick=async()=>{try{await api('logout');}catch(e){}st={usuario:null,candidatos:[],filtro:'todos',busca:'',ordem:'nota',aberto:null};telaLogin();};
  const busca=document.getElementById('busca');
  busca.oninput=()=>{st.busca=busca.value;desenhaLista();};
@@ -334,13 +360,9 @@ function abre(c){
     ${par('Teste técnico',num(c.pct_tecnico)+'%')}
     ${par('Aderência de perfil',num(c.pct_perfil)+'%')}
     ${par('Saídas de tela na prova',num(c.foco_perdido))}</div>
-   <div class="bloco"><h3>Perfil nas 7 competências do SAC</h3>${radarSVG(c.perfil)}${dims}</div>
+   <div class="bloco"><h3>Perfil nas ${Object.keys(DIMS).length} competências da vaga</h3>${radarSVG(c.perfil)}${dims}</div>
    <div class="bloco"><h3>Triagem</h3>
-    ${par('Experiência em SAC / last mile',esc(c.experiencia))}
-    ${par('App de rastreamento',esc(c.app_rastreamento))}
-    ${par('Já usou ESL',esc(c.esl))}
-    ${par('Região onde mora',esc(c.regiao))}
-    ${par('Horário preferido',esc(c.horario_pref))}</div>
+    ${Object.keys(TRIAGEM_COLS).map(col=>par(TRIAGEM_COLS[col],esc(c[col]))).join('')}</div>
    <div class="bloco"><h3>Entrevista em áudio</h3>
     ${c.audios.length?`<p class="small" style="margin:0 0 10px">${c.audios.length} resposta(s) gravada(s). Abrem no Google Drive.</p>
       <div class="acoes">${c.audios.map((l,i)=>`<a class="btn ghost sm" href="${esc(l)}" target="_blank" rel="noopener">Áudio ${i+1}</a>`).join('')}</div>`

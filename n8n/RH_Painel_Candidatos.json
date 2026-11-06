@@ -6,7 +6,10 @@
       "name": "Webhook Painel",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [0, 0],
+      "position": [
+        0,
+        0
+      ],
       "webhookId": "b1d3b484-8032-4ac0-b6a3-459cf3a12720",
       "parameters": {
         "httpMethod": "POST",
@@ -23,11 +26,28 @@
       }
     },
     {
+      "id": "aba-vaga",
+      "name": "Aba da Vaga",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -180
+      ],
+      "notes": "Traduz o slug da vaga que o painel pediu para a aba da planilha. Mesma lista do no Config da Vaga no fluxo de captura.",
+      "parameters": {
+        "jsCode": "const b = ($json.body || $json) || {};\nconst slug = String(b.vaga || '').trim() || 'sac';\n\nconst ABAS = { sac: 'Candidatos', controladoria: 'Controladoria' };\n\nreturn [{ json: { aba: ABAS[slug] || ABAS.sac, slug: slug } }];"
+      }
+    },
+    {
       "id": "df8f6411-dd43-4ff5-b966-599aff79277d",
       "name": "Ler Candidatos",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [224, 0],
+      "position": [
+        224,
+        0
+      ],
       "parameters": {
         "resource": "sheet",
         "operation": "read",
@@ -39,9 +59,8 @@
         },
         "sheetName": {
           "__rl": true,
-          "mode": "list",
-          "value": "861874780",
-          "cachedResultName": "Candidatos"
+          "mode": "name",
+          "value": "={{ $('Aba da Vaga').first().json.aba }}"
         },
         "options": {}
       },
@@ -50,14 +69,18 @@
           "id": "U19EKQk0BfI6Usmr",
           "name": "automacao.ia@mandalog.com.br"
         }
-      }
+      },
+      "alwaysOutputData": true
     },
     {
       "id": "ba37423f-092a-43ba-bb3b-4ab5edcc11bd",
       "name": "Montar Lista",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [448, 0],
+      "position": [
+        448,
+        0
+      ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "jsCode": "const campos = ['data','vaga','nome','whatsapp','email','experiencia','app_rastreamento','esl','regiao','horario_pref','nota_final','pct_triagem','pct_tecnico','comunicacao','senso_urgencia','gestao_conflitos','proatividade','cobranca_influencia','resiliencia','registro','pct_perfil','status','foco_perdido','qtd_audios','link_audios','cidade','bairro','indicado','indicado_por','entrevista_em','entrevista_gestor','analise_ia','fortes_ia','atencao_ia','perguntas_ia'];\n\nconst saida = [];\nfor (const it of items) {\n  const j = it.json || {};\n  if (!String(j.nome || '').trim() && !String(j.email || '').trim()) continue;\n  const o = {};\n  for (const c of campos) { o[c] = (j[c] === null || j[c] === undefined) ? '' : j[c]; }\n  saida.push({ json: o });\n}\n\nsaida.sort((a, b) => new Date(b.json.data || 0) - new Date(a.json.data || 0));\nreturn saida;"
@@ -68,17 +91,63 @@
       "name": "Responder Painel",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
-      "position": [672, 0],
+      "position": [
+        672,
+        0
+      ],
       "parameters": {
-        "respondWith": "allIncomingItems",
-        "options": { "responseKey": "candidatos" }
+        "respondWith": "firstIncomingItem",
+        "options": {}
       }
     }
   ],
   "connections": {
-    "Webhook Painel": { "main": [[{ "node": "Ler Candidatos", "type": "main", "index": 0 }]] },
-    "Ler Candidatos": { "main": [[{ "node": "Montar Lista", "type": "main", "index": 0 }]] },
-    "Montar Lista": { "main": [[{ "node": "Responder Painel", "type": "main", "index": 0 }]] }
+    "Webhook Painel": {
+      "main": [
+        [
+          {
+            "node": "Aba da Vaga",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ler Candidatos": {
+      "main": [
+        [
+          {
+            "node": "Montar Lista",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar Lista": {
+      "main": [
+        [
+          {
+            "node": "Responder Painel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aba da Vaga": {
+      "main": [
+        [
+          {
+            "node": "Ler Candidatos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": {
+    "executionOrder": "v1"
+  }
 }

@@ -406,5 +406,21 @@
    "Conte uma situação real em que um cliente ou motorista estava irritado e você resolveu. O que você fez e falou, na prática?",
    "Num dia de pico, com várias ocorrências ao mesmo tempo, como você se organiza para não deixar nada sem resposta?"
   ]
+ },
+ "colunas_perfil": {
+  "comunicacao": "Comunicação clara",
+  "senso_urgencia": "Senso de urgência",
+  "gestao_conflitos": "Gestão de conflitos",
+  "proatividade": "Proatividade",
+  "cobranca_influencia": "Cobrança e influência",
+  "resiliencia": "Resiliência",
+  "registro": "Capricho no registro"
+ },
+ "colunas_triagem": {
+  "experiencia": "Experiência em SAC / last mile",
+  "app_rastreamento": "App de rastreamento",
+  "esl": "Já usou ESL",
+  "regiao": "Região onde mora",
+  "horario_pref": "Horário preferido"
  }
 }

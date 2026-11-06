@@ -61,15 +61,23 @@ v.secoes.filter(s=>s.tipo==='mcq').forEach(s=>
 "
 ```
 
-## O que ainda depende do n8n
+## O lado do n8n
 
-O portal manda `vaga_slug` em todo envio (verificar, candidatura e agendamento).
-Falta o n8n usar esse campo para:
+O portal manda `vaga_slug` em todo envio (verificar, candidatura e agendamento) e o
+n8n já usa esse campo. **Abrir uma vaga nova exige uma entrada em dois lugares do
+n8n**, além do JSON aqui:
 
-- gravar **numa aba por vaga** (as competências mudam, então as colunas mudam);
-- usar a **descrição daquela vaga** no prompt da análise de IA;
-- avisar o **grupo de WhatsApp** daquela vaga;
-- checar recandidatura **só dentro da mesma vaga** — a mesma pessoa pode,
-  legitimamente, se candidatar a duas.
+1. **Fluxo de captura** → nó **Config da Vaga**: acrescente o slug com `aba`,
+   `grupo` (WhatsApp), `cargo` e `corte`/`pesos` (que vão para o prompt da IA), e os
+   mapas `triagem` e `perfil` — eles dizem qual id vira qual coluna da planilha.
+2. **Fluxo do painel** → nó **Aba da Vaga**: acrescente `slug: 'NomeDaAba'`.
+3. **Planilha**: crie a aba com o cabeçalho correspondente (as colunas base são
+   iguais para todas as vagas; as de triagem e competências vêm dos mapas acima).
 
-Enquanto isso não for feito, tudo cai na aba `Candidatos` com as colunas do SAC.
+Com isso cada vaga tem a sua aba, o seu prompt de IA, o seu grupo de WhatsApp e a
+trava de recandidatura passa a valer **por vaga** — a mesma pessoa pode se
+candidatar a duas vagas diferentes, que é o certo.
+
+No painel, as colunas de triagem e competências que aparecem na ficha vêm de
+`colunas_triagem` e `colunas_perfil` no JSON da vaga. Se você acrescentar uma
+competência, acrescente nos dois lugares (o mapa do n8n e o `colunas_perfil`).

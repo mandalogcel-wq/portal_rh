@@ -16,6 +16,8 @@ for conta dele (logins/credenciais); o resto execute.
   uma linha na planilha.
 - Painel do RH e dos gestores em `public/painel.html` + `api/painel.js`
   (login, sessão em cookie assinado, leitura da planilha via n8n). Ver `docs/painel-rh.md`.
+  **Multi-vagas desde 06/11:** seletor de vaga no topo; competências, itens de triagem
+  e corte vêm de `colunas_perfil`/`colunas_triagem`/`corte` do JSON da vaga.
 - n8n do Marcus: editor em `n8n-editor.zqpvje.easypanel.host`, webhooks de produção
   em `n8n-webhook.zqpvje.easypanel.host`. Usar sempre a URL no formato limpo
   `/webhook/rh-candidatura`, nunca a versão com UUID.
@@ -31,7 +33,15 @@ for conta dele (logins/credenciais); o resto execute.
 - ID: `15-sp05bPGDkNmVezG31LJrIV9QpGWzcxAON4ZSra1MA` (gid da aba: `861874780`).
 - Compartilhada como editor com `automacao.ia@mandalog.com.br` (conta da credencial do n8n).
 
-## Passo 3 — n8n (captura) ✅ FEITO
+## Passo 3 — n8n (captura) ✅ FEITO · multi-vagas desde 06/11
+- **Nó `Config da Vaga`**, logo depois do webhook, traduz `vaga_slug` em: aba da
+  planilha, grupo do WhatsApp, descrição do cargo + corte + pesos (vão para o prompt
+  da IA) e os mapas de triagem/competências → colunas. `Montar Linha` e
+  `Montar Prompt da IA` são genéricos; as três leituras/escritas no Sheets apontam
+  para a aba da vaga. Abrir vaga nova = uma entrada nesse nó (ver `docs/vagas.md`).
+- Abas da planilha: `Candidatos` (SAC, 28 linhas) e `Controladoria` (gid 1101916509,
+  34 colunas, criada em 06/11, vazia).
+- A trava de recandidatura passou a valer **por vaga**, porque cada uma lê a sua aba.
 - Workflow **RH - Captura de Candidatura (Portal SAC)** (`2F7ZSfH4KZAEOhPP`), ativo,
   no projeto pessoal "Mandalog Integração". Um IF no começo separa os três tipos de
   envio (verificar / agendamento / candidatura); o caminho da candidatura é
@@ -146,10 +156,11 @@ Usuários novos: `node scripts/gerar-senha.mjs "email" "Nome" rh|gestor`.
 ## Vagas
 - **SAC — Assistente de SAC** (`sac`): ✅ **PREENCHIDA** em 11/2026, status `encerrada`.
   28 candidatos, 1 acima do corte de 85.
-- **Analista de Controladoria Pleno** (`controladoria`): JSON escrito, **ainda não
-  listado** em `vagas/index.json` (revisão pelo link direto `/?vaga=controladoria`).
-  Falta: gestor (nome/e-mail), confirmar local e jornada, e o grupo de WhatsApp.
-  Corte 70, pesos 30/35/35, 5 competências (ANA, ORG, PRO, PRI, COM).
+- **Analista de Controladoria Pleno** (`controladoria`): pronta e testada de ponta a
+  ponta (portal → n8n → aba própria → análise de IA → painel), mas **ainda não listada**
+  em `vagas/index.json`, de propósito: revisão pelo link direto `/?vaga=controladoria`.
+  Falta do Marcus: gestor (nome/e-mail), confirmar local e jornada, e o grupo de
+  WhatsApp. Corte 70, pesos 30/35/35, 5 competências (ANA, ORG, PRO, PRI, COM).
 - **Coordenador de Armazém Geral**: descrição ainda não recebida.
 
 ## Decisões a confirmar com o Marcus
